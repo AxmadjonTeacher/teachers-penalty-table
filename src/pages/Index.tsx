@@ -9,7 +9,6 @@ import { Toaster } from "sonner";
 interface Student {
   id: number;
   name: string;
-  grade: number;
   proficiencyLevel: string;
 }
 
@@ -17,11 +16,10 @@ const Index = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleAddStudent = (name: string, grade: number, proficiencyLevel: string) => {
+  const handleAddStudent = (name: string, proficiencyLevel: string) => {
     const newStudent: Student = {
       id: Date.now(),
       name,
-      grade,
       proficiencyLevel,
     };
     setStudents((prev) => [...prev, newStudent]);
@@ -36,8 +34,8 @@ const Index = () => {
       <Toaster richColors />
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-[#1A1F2C] mb-2">Student Grade Manager</h1>
-          <p className="text-gray-600">Keep track of your students' performance and English proficiency</p>
+          <h1 className="text-4xl font-bold text-[#1A1F2C] mb-2">Student English Level Manager</h1>
+          <p className="text-gray-600">Keep track of your students' English proficiency levels</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
@@ -67,7 +65,6 @@ const Index = () => {
                   <StudentCard
                     key={student.id}
                     name={student.name}
-                    grade={student.grade}
                     proficiencyLevel={student.proficiencyLevel}
                   />
                 ))
