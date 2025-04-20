@@ -2,9 +2,10 @@
 interface StudentCardProps {
   name: string;
   grade: number;
+  proficiencyLevel: string;
 }
 
-export const StudentCard = ({ name, grade }: StudentCardProps) => {
+export const StudentCard = ({ name, grade, proficiencyLevel }: StudentCardProps) => {
   const getGradeColor = (grade: number) => {
     if (grade >= 90) return "text-green-600";
     if (grade >= 80) return "text-blue-600";
@@ -15,9 +16,14 @@ export const StudentCard = ({ name, grade }: StudentCardProps) => {
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
       <h3 className="font-medium text-lg text-[#1A1F2C]">{name}</h3>
-      <p className={`text-2xl font-bold ${getGradeColor(grade)}`}>
-        {grade}%
-      </p>
+      <div className="mt-2">
+        <p className={`text-2xl font-bold ${getGradeColor(grade)}`}>
+          {grade}%
+        </p>
+        <p className="text-gray-600 mt-1">
+          Proficiency: {proficiencyLevel}
+        </p>
+      </div>
     </div>
   );
 };
