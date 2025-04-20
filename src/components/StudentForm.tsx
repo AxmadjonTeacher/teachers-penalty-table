@@ -34,21 +34,25 @@ export const StudentForm = ({ onAddStudent }: StudentFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-6 bg-white rounded-lg shadow-sm">
+    <form onSubmit={handleSubmit} className="space-y-6 p-6 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 transition-all hover:shadow-xl">
       <div className="space-y-2">
-        <Label htmlFor="name">Full Name</Label>
+        <Label htmlFor="name" className="text-[#1A1F2C] font-medium">
+          Full Name
+        </Label>
         <Input
           id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Enter student's full name"
-          className="w-full"
+          className="h-12 text-lg bg-white/80 backdrop-blur-sm border-white/20"
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="proficiency">English Proficiency</Label>
+        <Label htmlFor="proficiency" className="text-[#1A1F2C] font-medium">
+          English Proficiency
+        </Label>
         <Select value={proficiencyLevel} onValueChange={setProficiencyLevel}>
-          <SelectTrigger>
+          <SelectTrigger className="h-12 text-lg bg-white/80 backdrop-blur-sm border-white/20">
             <SelectValue placeholder="Select proficiency level" />
           </SelectTrigger>
           <SelectContent>
@@ -58,7 +62,7 @@ export const StudentForm = ({ onAddStudent }: StudentFormProps) => {
           </SelectContent>
         </Select>
       </div>
-      <Button type="submit" className="w-full bg-[#9b87f5] hover:bg-[#7E69AB]">
+      <Button type="submit" className="w-full h-12 text-lg bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors">
         Add Student
       </Button>
     </form>
