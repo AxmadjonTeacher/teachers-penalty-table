@@ -70,20 +70,20 @@ const Index = () => {
   const searching = searchQuery.trim().length > 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E5DEFF] to-white py-8 px-2 md:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#8B5CF6]/10 to-white py-8 px-2 md:px-8">
       <Toaster richColors />
       <div className="max-w-7xl mx-auto space-y-10">
-        <header className="text-center space-y-4 flex items-center justify-center">
+        <header className="text-center space-y-4 flex items-center justify-center animate-fade-in">
           <StudentIcon />
-          <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#7E69AB] via-[#9b87f5] to-[#FDE1D3] mb-2 tracking-tight drop-shadow animate-fade-in">
+          <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] via-[#7C3AED] to-[#6D28D9] mb-2 tracking-tight drop-shadow">
             Student English Level Manager
           </h1>
         </header>
 
         <div className="flex flex-col md:flex-row gap-10">
-          <aside className="md:w-1/3 sticky top-8 animate-scale-in p-6 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-white/20">
+          <aside className="md:w-1/3 sticky top-8 animate-scale-in p-6 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-[#8B5CF6]/20 hover:shadow-xl transition-all duration-300">
             <h2 className="text-2xl font-semibold mb-6 text-[#1A1F2C] flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-[#9b87f5]" />
+              <span className="h-2 w-2 rounded-full bg-[#8B5CF6]" />
               Add New Student
             </h2>
             <StudentForm onAddStudent={handleAddStudent} />
@@ -91,12 +91,12 @@ const Index = () => {
 
           <main className="md:w-2/3 flex flex-col items-center gap-6">
             <section className="w-full max-w-4xl animate-fade-in relative mb-4">
-              <Search className="absolute left-4 top-3.5 h-5 w-5 text-gray-500" />
+              <Search className="absolute left-4 top-3.5 h-5 w-5 text-[#8B5CF6]" />
               <Input
                 placeholder="Search students by name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-12 text-lg bg-white/90 backdrop-blur-md border-white/40 shadow-xl hover:shadow-2xl transition-all"
+                className="pl-12 h-12 text-lg bg-white/90 backdrop-blur-md border-[#8B5CF6]/20 shadow-xl hover:shadow-2xl transition-all duration-300 focus:border-[#8B5CF6]/40"
               />
             </section>
 

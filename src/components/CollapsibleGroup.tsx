@@ -29,7 +29,7 @@ export const CollapsibleGroup = ({
     <div className="w-full max-w-4xl mx-auto mt-2 animate-fade-in">
       <Button
         variant="outline"
-        className="flex items-center justify-center gap-2 mx-auto mb-4 bg-white shadow-md hover:shadow-lg transition-all rounded-lg"
+        className="flex items-center justify-center gap-2 mx-auto mb-4 bg-white shadow-md hover:shadow-lg transition-all duration-300 rounded-lg border-[#8B5CF6]/20 hover:bg-[#8B5CF6]/5"
         onClick={() => setExpanded(!expanded)}
         aria-expanded={expanded}
         aria-controls="collapsible-student-groups"
@@ -37,19 +37,19 @@ export const CollapsibleGroup = ({
         {expanded ? (
           <>
             Hide Intermediate & Advanced Groups
-            <ChevronUp className="w-5 h-5" />
+            <ChevronUp className="w-5 h-5 text-[#8B5CF6]" />
           </>
         ) : (
           <>
             Show Intermediate & Advanced Groups
-            <ChevronDown className="w-5 h-5" />
+            <ChevronDown className="w-5 h-5 text-[#8B5CF6]" />
           </>
         )}
       </Button>
       {expanded && (
         <div
           id="collapsible-student-groups"
-          className="space-y-6"
+          className="space-y-6 animate-accordion-down"
           aria-live="polite"
         >
           <GroupTable
