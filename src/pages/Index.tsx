@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { StudentForm } from "@/components/StudentForm";
 import { Input } from "@/components/ui/input";
@@ -8,6 +7,8 @@ import { toast } from "sonner";
 import { GroupTable } from "@/components/GroupTable";
 import { CollapsibleGroup } from "@/components/CollapsibleGroup";
 import { StudentIcon } from "@/components/StudentIcon";
+import { DndContext, DragEndEvent, closestCenter } from '@dnd-kit/core';
+import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
 const STORAGE_KEY = "studentData";
 
@@ -49,6 +50,26 @@ const Index = () => {
   const handleDeleteStudent = (id: number) => {
     setStudents((prev) => prev.filter((stu) => stu.id !== id));
     toast.success("Student removed.");
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeStudent = students.find(s => s.id === active.id);
+    if (!activeStudent) return;
+
+    const overContainer = over.data.current?.sortable?.containerId;
+    if (!overContainer) return;
+
+    if (activeStudent.proficiencyLevel !== overContainer) {
+      setStudents(prev => prev.map(student => 
+        student.id === activeStudent.id 
+          ? { ...student, proficiencyLevel: overContainer }
+          : student
+      ));
+      toast.success(`Moved ${activeStudent.name} to ${overContainer}`);
+    }
   };
 
   const filteredStudents = students.filter((student) =>
@@ -108,20 +129,22 @@ const Index = () => {
                 onDeleteStudent={handleDeleteStudent}
               />
             ) : (
-              <>
-                <GroupTable
-                  title="Beginner Group"
-                  students={beginnerGroup}
-                  recentlyAddedId={recentlyAddedId}
-                  onDeleteStudent={handleDeleteStudent}
-                />
-                <CollapsibleGroup
-                  intermediateGroup={intermediateGroup}
-                  advancedGroup={advancedGroup}
-                  recentlyAddedId={recentlyAddedId}
-                  onDeleteStudent={handleDeleteStudent}
-                />
-              </>
+              <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={students.map(s => s.id)} strategy={verticalListSortingStrategy}>
+                  <GroupTable
+                    title="Beginner Group"
+                    students={beginnerGroup}
+                    recentlyAddedId={recentlyAddedId}
+                    onDeleteStudent={handleDeleteStudent}
+                  />
+                  <CollapsibleGroup
+                    intermediateGroup={intermediateGroup}
+                    advancedGroup={advancedGroup}
+                    recentlyAddedId={recentlyAddedId}
+                    onDeleteStudent={handleDeleteStudent}
+                  />
+                </SortableContext>
+              </DndContext>
             )}
           </main>
         </div>
