@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Table,
@@ -8,11 +9,22 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DeleteButton } from "@/components/ui/DeleteButton";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 interface Student {
   id: number;
   name: string;
   proficiencyLevel: string;
+  date?: Date;
 }
 
 const levelColors: Record<string, string> = {
@@ -25,9 +37,10 @@ interface StudentRowProps {
   student: Student;
   recentlyAddedId: number | null;
   onDeleteStudent: (id: number) => void;
+  onDateChange: (studentId: number, date: Date) => void;
 }
 
-const StudentRow = ({ student, recentlyAddedId, onDeleteStudent }: StudentRowProps) => {
+const StudentRow = ({ student, recentlyAddedId, onDeleteStudent, onDateChange }: StudentRowProps) => {
   const [grade, setGrade] = useState<string>("");
 
   const gradeColors = {
@@ -73,6 +86,35 @@ const StudentRow = ({ student, recentlyAddedId, onDeleteStudent }: StudentRowPro
         </div>
       </TableCell>
       <TableCell>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant={"outline"}
+              className={cn(
+                "w-[180px] pl-3 text-left font-normal",
+                !student.date && "text-muted-foreground"
+              )}
+            >
+              {student.date ? (
+                format(student.date, "PPP")
+              ) : (
+                <span>Pick a date</span>
+              )}
+              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={student.date}
+              onSelect={(date) => date && onDateChange(student.id, date)}
+              initialFocus
+              className="rounded-md border"
+            />
+          </PopoverContent>
+        </Popover>
+      </TableCell>
+      <TableCell>
         <DeleteButton
           onClick={() => onDeleteStudent(student.id)}
           title="Delete student"
@@ -87,6 +129,7 @@ interface GroupTableProps {
   title: string;
   recentlyAddedId: number | null;
   onDeleteStudent: (id: number) => void;
+  onDateChange: (studentId: number, date: Date) => void;
 }
 
 export const GroupTable = ({
@@ -94,9 +137,10 @@ export const GroupTable = ({
   title,
   recentlyAddedId,
   onDeleteStudent,
+  onDateChange,
 }: GroupTableProps) => (
   <div
-    className="rounded-xl p-4 shadow-md border-2 bg-gradient-to-bl from-white/90 to-[#E5DEFF]/60 border-[#E5DEFF] transition-all hover:shadow-lg animate-fade-in group h-full flex flex-col"
+    className="rounded-xl p-4 shadow-md border-2 bg-gradient-to-bl from-white/90 to-[#E5DEFF]/60 border-[#E5DEFF] transition-all hover:shadow-lg animate-fade-in group"
     aria-label={`${title} students table`}
   >
     <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
@@ -112,17 +156,14 @@ export const GroupTable = ({
         No students in this group yet.
       </p>
     ) : (
-      <div className="overflow-auto flex-grow">
+      <div className="overflow-auto">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="font-semibold text-[#1A1F2C]/70">Name</TableHead>
-              <TableHead className="font-semibold text-[#1A1F2C]/70">
-                Proficiency Level
-              </TableHead>
-              <TableHead className="font-semibold text-[#1A1F2C]/70">
-                Grade
-              </TableHead>
+              <TableHead className="font-semibold text-[#1A1F2C]/70">Grade Level</TableHead>
+              <TableHead className="font-semibold text-[#1A1F2C]/70">Grade</TableHead>
+              <TableHead className="font-semibold text-[#1A1F2C]/70">Date</TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
@@ -133,6 +174,7 @@ export const GroupTable = ({
                 student={student}
                 recentlyAddedId={recentlyAddedId}
                 onDeleteStudent={onDeleteStudent}
+                onDateChange={onDateChange}
               />
             ))}
           </TableBody>
