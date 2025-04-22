@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Table,
@@ -17,9 +16,9 @@ interface Student {
 }
 
 const levelColors: Record<string, string> = {
-  "Beginner Group": "bg-[#E5DEFF] text-[#9b87f5]",
-  "Intermediate Group": "bg-[#FDE1D3] text-[#E97D27]",
-  "Advanced Group": "bg-[#D3E4FD] text-[#4170AB]",
+  "Grades 5-6": "bg-[#E5DEFF] text-[#9b87f5]",
+  "Grades 7-8": "bg-[#FDE1D3] text-[#E97D27]",
+  "Grades 9-11": "bg-[#D3E4FD] text-[#4170AB]",
 };
 
 interface StudentRowProps {

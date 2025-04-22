@@ -23,7 +23,7 @@ export const StudentForm = ({ onAddStudent }: StudentFormProps) => {
     }
 
     if (!proficiencyLevel) {
-      toast.error("Please select a proficiency level");
+      toast.error("Please select a grade level");
       return;
     }
 
@@ -49,16 +49,16 @@ export const StudentForm = ({ onAddStudent }: StudentFormProps) => {
       </div>
       <div className="space-y-2">
         <Label htmlFor="proficiency" className="text-[#1A1F2C] font-medium">
-          English Proficiency
+          Grade Level
         </Label>
         <Select value={proficiencyLevel} onValueChange={setProficiencyLevel}>
           <SelectTrigger className="h-12 text-lg bg-white/80 backdrop-blur-sm border-white/20">
-            <SelectValue placeholder="Select proficiency level" />
+            <SelectValue placeholder="Select grade level" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Beginner Group">Beginner Group</SelectItem>
-            <SelectItem value="Intermediate Group">Intermediate Group</SelectItem>
-            <SelectItem value="Advanced Group">Advanced Group</SelectItem>
+            <SelectItem value="Grades 5-6">Grades 5-6</SelectItem>
+            <SelectItem value="Grades 7-8">Grades 7-8</SelectItem>
+            <SelectItem value="Grades 9-11">Grades 9-11</SelectItem>
           </SelectContent>
         </Select>
       </div>

@@ -18,7 +18,6 @@ interface Student {
 
 const Index = () => {
   const [students, setStudents] = useState<Student[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const [recentlyAddedId, setRecentlyAddedId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -41,7 +40,6 @@ const Index = () => {
     setStudents((prev) => [...prev, newStudent]);
     setRecentlyAddedId(newStudent.id);
     setTimeout(() => setRecentlyAddedId(null), 700);
-    setSearchQuery("");
     toast.success("Student added successfully!");
   };
 
@@ -50,23 +48,17 @@ const Index = () => {
     toast.success("Student removed.");
   };
 
-  const filteredStudents = students.filter((student) =>
-    student.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const grades56Group = students.filter(
+    (student) => student.proficiencyLevel === "Grades 5-6"
   );
 
-  const beginnerGroup = students.filter(
-    (student) => student.proficiencyLevel === "Beginner Group"
+  const grades78Group = students.filter(
+    (student) => student.proficiencyLevel === "Grades 7-8"
   );
 
-  const intermediateGroup = students.filter(
-    (student) => student.proficiencyLevel === "Intermediate Group"
+  const grades911Group = students.filter(
+    (student) => student.proficiencyLevel === "Grades 9-11"
   );
-
-  const advancedGroup = students.filter(
-    (student) => student.proficiencyLevel === "Advanced Group"
-  );
-
-  const searching = searchQuery.trim().length > 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#8B5CF6]/10 to-white py-8 px-2 md:px-8">
@@ -75,7 +67,7 @@ const Index = () => {
         <header className="text-center space-y-4 flex items-center justify-center animate-fade-in">
           <StudentIcon />
           <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] via-[#7C3AED] to-[#6D28D9] mb-2 tracking-tight drop-shadow">
-            Student English Level Manager
+            Student Grade Level Manager
           </h1>
         </header>
 
@@ -86,49 +78,30 @@ const Index = () => {
               Add New Student
             </h2>
             <StudentForm onAddStudent={handleAddStudent} />
-            
-            <div className="w-full mt-6 animate-fade-in relative">
-              <Search className="absolute left-4 top-3.5 h-5 w-5 text-[#8B5CF6]" />
-              <Input
-                placeholder="Search students by name..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-12 text-lg bg-white/90 backdrop-blur-md border-[#8B5CF6]/20 shadow-xl hover:shadow-2xl transition-all duration-300 focus:border-[#8B5CF6]/40"
-              />
-            </div>
           </aside>
 
           <main className="md:w-2/3 lg:w-3/4">
             <GradeLegend />
-            {searching ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <GroupTable
-                title="Search Results"
-                students={filteredStudents}
+                title="Grades 5-6"
+                students={grades56Group}
                 recentlyAddedId={recentlyAddedId}
                 onDeleteStudent={handleDeleteStudent}
               />
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <GroupTable
-                  title="Beginner Group"
-                  students={beginnerGroup}
-                  recentlyAddedId={recentlyAddedId}
-                  onDeleteStudent={handleDeleteStudent}
-                />
-                <GroupTable
-                  title="Intermediate Group"
-                  students={intermediateGroup}
-                  recentlyAddedId={recentlyAddedId}
-                  onDeleteStudent={handleDeleteStudent}
-                />
-                <GroupTable
-                  title="Advanced Group"
-                  students={advancedGroup}
-                  recentlyAddedId={recentlyAddedId}
-                  onDeleteStudent={handleDeleteStudent}
-                />
-              </div>
-            )}
+              <GroupTable
+                title="Grades 7-8"
+                students={grades78Group}
+                recentlyAddedId={recentlyAddedId}
+                onDeleteStudent={handleDeleteStudent}
+              />
+              <GroupTable
+                title="Grades 9-11"
+                students={grades911Group}
+                recentlyAddedId={recentlyAddedId}
+                onDeleteStudent={handleDeleteStudent}
+              />
+            </div>
           </main>
         </div>
       </div>
