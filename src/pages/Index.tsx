@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { StudentForm } from "@/components/StudentForm";
 import { Input } from "@/components/ui/input";
@@ -5,10 +6,22 @@ import { Search } from "lucide-react";
 import { Toaster } from "sonner";
 import { toast } from "sonner";
 import { GroupTable } from "@/components/GroupTable";
-import { CollapsibleGroup } from "@/components/CollapsibleGroup";
 import { StudentIcon } from "@/components/StudentIcon";
-import { DndContext, DragEndEvent, closestCenter } from '@dnd-kit/core';
-import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { 
+  DndContext, 
+  DragEndEvent, 
+  DragOverEvent,
+  DragStartEvent,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  closestCenter 
+} from '@dnd-kit/core';
+import { 
+  SortableContext, 
+  verticalListSortingStrategy 
+} from '@dnd-kit/sortable';
 
 const STORAGE_KEY = "studentData";
 
@@ -22,6 +35,23 @@ const Index = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [recentlyAddedId, setRecentlyAddedId] = useState<number | null>(null);
+  const [activeId, setActiveId] = useState<number | null>(null);
+
+  // Configure sensors for better drag detection
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: {
+      distance: 10, // 10px of movement before drag starts
+    },
+  });
+  
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 250, // 250ms delay before drag starts
+      tolerance: 5, // 5px of movement allowed before drag starts
+    },
+  });
+
+  const sensors = useSensors(mouseSensor, touchSensor);
 
   useEffect(() => {
     const savedData = localStorage.getItem(STORAGE_KEY);
@@ -52,17 +82,25 @@ const Index = () => {
     toast.success("Student removed.");
   };
 
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    setActiveId(active.id as number);
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    
+    setActiveId(null);
+    
     if (!over) return;
 
     const activeStudent = students.find(s => s.id === active.id);
     if (!activeStudent) return;
 
+    const overId = over.id;
     const overContainer = over.data.current?.sortable?.containerId;
-    if (!overContainer) return;
-
-    if (activeStudent.proficiencyLevel !== overContainer) {
+    
+    if (overContainer && activeStudent.proficiencyLevel !== overContainer) {
       setStudents(prev => prev.map(student => 
         student.id === activeStudent.id 
           ? { ...student, proficiencyLevel: overContainer }
@@ -102,16 +140,14 @@ const Index = () => {
         </header>
 
         <div className="flex flex-col md:flex-row gap-10">
-          <aside className="md:w-1/3 sticky top-8 animate-scale-in p-6 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-[#8B5CF6]/20 hover:shadow-xl transition-all duration-300">
+          <aside className="md:w-1/3 lg:w-1/4 sticky top-8 animate-scale-in p-6 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-[#8B5CF6]/20 hover:shadow-xl transition-all duration-300">
             <h2 className="text-2xl font-semibold mb-6 text-[#1A1F2C] flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-[#8B5CF6]" />
               Add New Student
             </h2>
             <StudentForm onAddStudent={handleAddStudent} />
-          </aside>
-
-          <main className="md:w-2/3 flex flex-col items-center gap-6">
-            <section className="w-full max-w-4xl animate-fade-in relative mb-4">
+            
+            <div className="w-full mt-6 animate-fade-in relative">
               <Search className="absolute left-4 top-3.5 h-5 w-5 text-[#8B5CF6]" />
               <Input
                 placeholder="Search students by name..."
@@ -119,8 +155,10 @@ const Index = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-12 h-12 text-lg bg-white/90 backdrop-blur-md border-[#8B5CF6]/20 shadow-xl hover:shadow-2xl transition-all duration-300 focus:border-[#8B5CF6]/40"
               />
-            </section>
+            </div>
+          </aside>
 
+          <main className="md:w-2/3 lg:w-3/4">
             {searching ? (
               <GroupTable
                 title="Search Results"
@@ -129,21 +167,40 @@ const Index = () => {
                 onDeleteStudent={handleDeleteStudent}
               />
             ) : (
-              <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext items={students.map(s => s.id)} strategy={verticalListSortingStrategy}>
-                  <GroupTable
-                    title="Beginner Group"
-                    students={beginnerGroup}
-                    recentlyAddedId={recentlyAddedId}
-                    onDeleteStudent={handleDeleteStudent}
-                  />
-                  <CollapsibleGroup
-                    intermediateGroup={intermediateGroup}
-                    advancedGroup={advancedGroup}
-                    recentlyAddedId={recentlyAddedId}
-                    onDeleteStudent={handleDeleteStudent}
-                  />
-                </SortableContext>
+              <DndContext 
+                sensors={sensors}
+                collisionDetection={closestCenter} 
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+              >
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <SortableContext items={beginnerGroup.map(s => s.id)} strategy={verticalListSortingStrategy}>
+                    <GroupTable
+                      title="Beginner Group"
+                      students={beginnerGroup}
+                      recentlyAddedId={recentlyAddedId}
+                      onDeleteStudent={handleDeleteStudent}
+                    />
+                  </SortableContext>
+                  
+                  <SortableContext items={intermediateGroup.map(s => s.id)} strategy={verticalListSortingStrategy}>
+                    <GroupTable
+                      title="Intermediate Group"
+                      students={intermediateGroup}
+                      recentlyAddedId={recentlyAddedId}
+                      onDeleteStudent={handleDeleteStudent}
+                    />
+                  </SortableContext>
+                  
+                  <SortableContext items={advancedGroup.map(s => s.id)} strategy={verticalListSortingStrategy}>
+                    <GroupTable
+                      title="Advanced Group"
+                      students={advancedGroup}
+                      recentlyAddedId={recentlyAddedId}
+                      onDeleteStudent={handleDeleteStudent}
+                    />
+                  </SortableContext>
+                </div>
               </DndContext>
             )}
           </main>

@@ -37,11 +37,20 @@ const DraggableRow = ({ student, recentlyAddedId, onDeleteStudent }: DraggableRo
     setNodeRef,
     transform,
     transition,
-  } = useSortable({ id: student.id });
+    isDragging,
+  } = useSortable({ 
+    id: student.id,
+    data: {
+      type: 'student',
+      student
+    }
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 100 : 1,
   };
 
   return (
@@ -52,7 +61,7 @@ const DraggableRow = ({ student, recentlyAddedId, onDeleteStudent }: DraggableRo
       {...listeners}
       className={`hover:bg-[#9b87f5]/10 transition-all duration-300 cursor-move group ${
         recentlyAddedId === student.id ? "animate-scale-in bg-[#C4B5FD]/30" : ""
-      }`}
+      } ${isDragging ? "shadow-lg" : ""}`}
     >
       <TableCell className="font-medium group-hover:text-[#8B5CF6]">{student.name}</TableCell>
       <TableCell>
@@ -88,7 +97,7 @@ export const GroupTable = ({
   onDeleteStudent,
 }: GroupTableProps) => (
   <div
-    className="rounded-xl p-6 shadow-md border-2 bg-gradient-to-bl from-white/90 to-[#E5DEFF]/60 border-[#E5DEFF] mb-6 transition-all hover:shadow-lg animate-fade-in group"
+    className="rounded-xl p-4 shadow-md border-2 bg-gradient-to-bl from-white/90 to-[#E5DEFF]/60 border-[#E5DEFF] transition-all hover:shadow-lg animate-fade-in group h-full flex flex-col"
     aria-label={`${title} students table`}
   >
     <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
@@ -104,27 +113,29 @@ export const GroupTable = ({
         No students in this group yet.
       </p>
     ) : (
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="font-semibold text-[#1A1F2C]/70">Name</TableHead>
-            <TableHead className="font-semibold text-[#1A1F2C]/70">
-              Proficiency Level
-            </TableHead>
-            <TableHead />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {students.map((student) => (
-            <DraggableRow
-              key={student.id}
-              student={student}
-              recentlyAddedId={recentlyAddedId}
-              onDeleteStudent={onDeleteStudent}
-            />
-          ))}
-        </TableBody>
-      </Table>
+      <div className="overflow-auto flex-grow">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="font-semibold text-[#1A1F2C]/70">Name</TableHead>
+              <TableHead className="font-semibold text-[#1A1F2C]/70">
+                Proficiency Level
+              </TableHead>
+              <TableHead />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {students.map((student) => (
+              <DraggableRow
+                key={student.id}
+                student={student}
+                recentlyAddedId={recentlyAddedId}
+                onDeleteStudent={onDeleteStudent}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     )}
   </div>
 );
