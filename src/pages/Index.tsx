@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { StudentForm } from "@/components/StudentForm";
 import { Input } from "@/components/ui/input";
@@ -7,21 +6,7 @@ import { Toaster } from "sonner";
 import { toast } from "sonner";
 import { GroupTable } from "@/components/GroupTable";
 import { StudentIcon } from "@/components/StudentIcon";
-import { 
-  DndContext, 
-  DragEndEvent, 
-  DragOverEvent,
-  DragStartEvent,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-  closestCenter 
-} from '@dnd-kit/core';
-import { 
-  SortableContext, 
-  verticalListSortingStrategy 
-} from '@dnd-kit/sortable';
+import { GradeLegend } from "@/components/GradeLegend";
 
 const STORAGE_KEY = "studentData";
 
@@ -35,23 +20,6 @@ const Index = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [recentlyAddedId, setRecentlyAddedId] = useState<number | null>(null);
-  const [activeId, setActiveId] = useState<number | null>(null);
-
-  // Configure sensors for better drag detection
-  const mouseSensor = useSensor(MouseSensor, {
-    activationConstraint: {
-      distance: 10, // 10px of movement before drag starts
-    },
-  });
-  
-  const touchSensor = useSensor(TouchSensor, {
-    activationConstraint: {
-      delay: 250, // 250ms delay before drag starts
-      tolerance: 5, // 5px of movement allowed before drag starts
-    },
-  });
-
-  const sensors = useSensors(mouseSensor, touchSensor);
 
   useEffect(() => {
     const savedData = localStorage.getItem(STORAGE_KEY);
@@ -80,34 +48,6 @@ const Index = () => {
   const handleDeleteStudent = (id: number) => {
     setStudents((prev) => prev.filter((stu) => stu.id !== id));
     toast.success("Student removed.");
-  };
-
-  const handleDragStart = (event: DragStartEvent) => {
-    const { active } = event;
-    setActiveId(active.id as number);
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    
-    setActiveId(null);
-    
-    if (!over) return;
-
-    const activeStudent = students.find(s => s.id === active.id);
-    if (!activeStudent) return;
-
-    const overId = over.id;
-    const overContainer = over.data.current?.sortable?.containerId;
-    
-    if (overContainer && activeStudent.proficiencyLevel !== overContainer) {
-      setStudents(prev => prev.map(student => 
-        student.id === activeStudent.id 
-          ? { ...student, proficiencyLevel: overContainer }
-          : student
-      ));
-      toast.success(`Moved ${activeStudent.name} to ${overContainer}`);
-    }
   };
 
   const filteredStudents = students.filter((student) =>
@@ -159,6 +99,7 @@ const Index = () => {
           </aside>
 
           <main className="md:w-2/3 lg:w-3/4">
+            <GradeLegend />
             {searching ? (
               <GroupTable
                 title="Search Results"
@@ -167,41 +108,26 @@ const Index = () => {
                 onDeleteStudent={handleDeleteStudent}
               />
             ) : (
-              <DndContext 
-                sensors={sensors}
-                collisionDetection={closestCenter} 
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
-              >
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <SortableContext items={beginnerGroup.map(s => s.id)} strategy={verticalListSortingStrategy}>
-                    <GroupTable
-                      title="Beginner Group"
-                      students={beginnerGroup}
-                      recentlyAddedId={recentlyAddedId}
-                      onDeleteStudent={handleDeleteStudent}
-                    />
-                  </SortableContext>
-                  
-                  <SortableContext items={intermediateGroup.map(s => s.id)} strategy={verticalListSortingStrategy}>
-                    <GroupTable
-                      title="Intermediate Group"
-                      students={intermediateGroup}
-                      recentlyAddedId={recentlyAddedId}
-                      onDeleteStudent={handleDeleteStudent}
-                    />
-                  </SortableContext>
-                  
-                  <SortableContext items={advancedGroup.map(s => s.id)} strategy={verticalListSortingStrategy}>
-                    <GroupTable
-                      title="Advanced Group"
-                      students={advancedGroup}
-                      recentlyAddedId={recentlyAddedId}
-                      onDeleteStudent={handleDeleteStudent}
-                    />
-                  </SortableContext>
-                </div>
-              </DndContext>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <GroupTable
+                  title="Beginner Group"
+                  students={beginnerGroup}
+                  recentlyAddedId={recentlyAddedId}
+                  onDeleteStudent={handleDeleteStudent}
+                />
+                <GroupTable
+                  title="Intermediate Group"
+                  students={intermediateGroup}
+                  recentlyAddedId={recentlyAddedId}
+                  onDeleteStudent={handleDeleteStudent}
+                />
+                <GroupTable
+                  title="Advanced Group"
+                  students={advancedGroup}
+                  recentlyAddedId={recentlyAddedId}
+                  onDeleteStudent={handleDeleteStudent}
+                />
+              </div>
             )}
           </main>
         </div>

@@ -1,7 +1,5 @@
 
-import React from "react";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -24,44 +22,31 @@ const levelColors: Record<string, string> = {
   "Advanced Group": "bg-[#D3E4FD] text-[#4170AB]",
 };
 
-interface DraggableRowProps {
+interface StudentRowProps {
   student: Student;
   recentlyAddedId: number | null;
   onDeleteStudent: (id: number) => void;
 }
 
-const DraggableRow = ({ student, recentlyAddedId, onDeleteStudent }: DraggableRowProps) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ 
-    id: student.id,
-    data: {
-      type: 'student',
-      student
-    }
-  });
+const StudentRow = ({ student, recentlyAddedId, onDeleteStudent }: StudentRowProps) => {
+  const [grade, setGrade] = useState<string>("");
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 100 : 1,
+  const gradeColors = {
+    "+": "text-green-600",
+    "K": "text-orange-500",
+    "KQ": "text-yellow-600",
+    "V": "text-red-500"
+  };
+
+  const handleGradeClick = (newGrade: string) => {
+    setGrade(grade === newGrade ? "" : newGrade);
   };
 
   return (
     <TableRow
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className={`hover:bg-[#9b87f5]/10 transition-all duration-300 cursor-move group ${
+      className={`hover:bg-[#9b87f5]/10 transition-all duration-300 ${
         recentlyAddedId === student.id ? "animate-scale-in bg-[#C4B5FD]/30" : ""
-      } ${isDragging ? "shadow-lg" : ""}`}
+      }`}
     >
       <TableCell className="font-medium group-hover:text-[#8B5CF6]">{student.name}</TableCell>
       <TableCell>
@@ -72,6 +57,21 @@ const DraggableRow = ({ student, recentlyAddedId, onDeleteStudent }: DraggableRo
         >
           {student.proficiencyLevel}
         </span>
+      </TableCell>
+      <TableCell>
+        <div className="flex gap-2">
+          {Object.entries(gradeColors).map(([gradeOption, colorClass]) => (
+            <button
+              key={gradeOption}
+              onClick={() => handleGradeClick(gradeOption)}
+              className={`px-2 py-1 rounded hover:bg-gray-100 transition-colors ${
+                grade === gradeOption ? `font-bold ${colorClass}` : "text-gray-500"
+              }`}
+            >
+              {gradeOption}
+            </button>
+          ))}
+        </div>
       </TableCell>
       <TableCell>
         <DeleteButton
@@ -121,12 +121,15 @@ export const GroupTable = ({
               <TableHead className="font-semibold text-[#1A1F2C]/70">
                 Proficiency Level
               </TableHead>
+              <TableHead className="font-semibold text-[#1A1F2C]/70">
+                Grade
+              </TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
           <TableBody>
             {students.map((student) => (
-              <DraggableRow
+              <StudentRow
                 key={student.id}
                 student={student}
                 recentlyAddedId={recentlyAddedId}
