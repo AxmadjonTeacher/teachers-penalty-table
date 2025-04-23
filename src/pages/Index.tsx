@@ -5,7 +5,6 @@ import { Toaster } from "sonner";
 import { toast } from "sonner";
 import { GroupTable } from "@/components/GroupTable";
 import { GradeLegend } from "@/components/GradeLegend";
-import { format } from "date-fns";
 
 const STORAGE_KEY = "studentData";
 
@@ -18,7 +17,7 @@ interface Student {
 
 function getInitialDates(): Date[] {
   // Today, yesterday, day before
-  const arr = [];
+  const arr: Date[] = [];
   for (let i = 2; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
@@ -40,6 +39,8 @@ const Index = () => {
     }
     const savedTeacher = localStorage.getItem("teacherName");
     if (savedTeacher) setTeacherName(savedTeacher);
+    const savedDates = localStorage.getItem("trackedDates");
+    if (savedDates) setTrackedDates(JSON.parse(savedDates).map((d: string) => new Date(d)));
   }, []);
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
@@ -47,6 +48,9 @@ const Index = () => {
   useEffect(() => {
     localStorage.setItem("teacherName", teacherName);
   }, [teacherName]);
+  useEffect(() => {
+    localStorage.setItem("trackedDates", JSON.stringify(trackedDates));
+  }, [trackedDates]);
 
   const handleAddStudent = (name: string, proficiencyLevel: string, className?: string) => {
     const newStudent: Student = {
@@ -66,7 +70,13 @@ const Index = () => {
     toast.success("Student removed.");
   };
 
-  // Group by proficiencyLevel, but the top "level" (Grades 5-6, etc.) comes from student.proficiencyLevel
+  const handleEditStudentName = (id: number, newName: string) => {
+    setStudents((prev) =>
+      prev.map((stu) => (stu.id === id ? { ...stu, name: newName } : stu))
+    );
+  };
+
+  // Groups
   const grades56Group = students.filter(
     (student) => student.proficiencyLevel === "Grades 5-6"
   );
@@ -82,7 +92,6 @@ const Index = () => {
     { title: "Grades 7-8", students: grades78Group },
     { title: "Grades 9-11", students: grades911Group }
   ];
-  const month = format(new Date(), "MMMM yyyy");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#8B5CF6]/10 to-white py-8 px-2 md:px-8">
@@ -101,7 +110,6 @@ const Index = () => {
               className="border border-[#8B5CF6]/40 px-3 py-2 rounded-lg shadow-sm focus:outline-[#8B5CF6] text-base"
               style={{ minWidth: 220 }}
             />
-            <span className="text-[#8B5CF6] font-semibold mx-2">{month}</span>
           </div>
         </header>
         <aside className="w-full animate-scale-in p-6 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-[#8B5CF6]/20 hover:shadow-xl transition-all duration-300">
@@ -116,13 +124,11 @@ const Index = () => {
             <GroupTable
               key={g.title}
               title={g.title}
-              month={month}
               students={g.students}
               teacherName={teacherName}
               recentlyAddedId={recentlyAddedId}
               onDeleteStudent={handleDeleteStudent}
-              dates={trackedDates}
-              onChangeDates={setTrackedDates}
+              onEditStudentName={handleEditStudentName}
             />
           ))}
         </main>
