@@ -16,10 +16,22 @@ interface Student {
   className?: string;
 }
 
+function getInitialDates(): Date[] {
+  // Today, yesterday, day before
+  const arr = [];
+  for (let i = 2; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    arr.push(d);
+  }
+  return arr;
+}
+
 const Index = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [recentlyAddedId, setRecentlyAddedId] = useState<number | null>(null);
   const [teacherName, setTeacherName] = useState<string>("");
+  const [trackedDates, setTrackedDates] = useState<Date[]>(getInitialDates);
 
   useEffect(() => {
     const savedData = localStorage.getItem(STORAGE_KEY);
@@ -54,7 +66,7 @@ const Index = () => {
     toast.success("Student removed.");
   };
 
-  // Students grouped by level, as before:
+  // Group by proficiencyLevel, but the top "level" (Grades 5-6, etc.) comes from student.proficiencyLevel
   const grades56Group = students.filter(
     (student) => student.proficiencyLevel === "Grades 5-6"
   );
@@ -91,11 +103,6 @@ const Index = () => {
             />
             <span className="text-[#8B5CF6] font-semibold mx-2">{month}</span>
           </div>
-          <div className="text-center text-[#8B5CF6] font-medium mt-2">
-            {teacherName &&
-              `Teacher: ${teacherName}`
-            }
-          </div>
         </header>
         <aside className="w-full animate-scale-in p-6 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-[#8B5CF6]/20 hover:shadow-xl transition-all duration-300">
           <h2 className="text-2xl font-semibold mb-6 text-[#1A1F2C] flex items-center gap-2">
@@ -114,6 +121,8 @@ const Index = () => {
               teacherName={teacherName}
               recentlyAddedId={recentlyAddedId}
               onDeleteStudent={handleDeleteStudent}
+              dates={trackedDates}
+              onChangeDates={setTrackedDates}
             />
           ))}
         </main>
