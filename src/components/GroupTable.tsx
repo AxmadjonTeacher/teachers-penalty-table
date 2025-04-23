@@ -9,12 +9,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DeleteButton } from "@/components/ui/DeleteButton";
-import { format } from "date-fns";
 
 interface Student {
   id: number;
   name: string;
   proficiencyLevel: string;
+  className?: string;
 }
 
 interface StudentRowProps {
@@ -39,17 +39,25 @@ const StudentRow = ({ student, recentlyAddedId, onDeleteStudent }: StudentRowPro
         recentlyAddedId === student.id ? "animate-scale-in bg-[#C4B5FD]/30" : ""
       }`}
     >
-      <TableCell className="font-medium group-hover:text-[#8B5CF6]">{student.name}</TableCell>
+      <TableCell className="font-medium group-hover:text-[#8B5CF6]">
+        <div className="flex flex-col">
+          <span>{student.name}</span>
+          <span className="text-xs text-gray-400">
+            {student.className ? `Class: ${student.className}` : ""}
+          </span>
+        </div>
+      </TableCell>
       <TableCell>
         <div className="flex gap-2">
           {gradeButtons.map(({ value, color, title }) => (
             <button
               key={value}
+              type="button"
               onClick={() => setGrade(grade === value ? "" : value)}
-              className={`px-3 py-1.5 rounded-md transition-colors ${
-                grade === value 
-                  ? `${color} font-bold bg-gray-100` 
-                  : "text-gray-500 hover:bg-gray-100"
+              className={`px-3 py-1.5 rounded-md border ${
+                grade === value
+                  ? `${color} font-bold bg-gray-100 border-gray-300 scale-105 shadow`
+                  : "text-gray-500 hover:bg-gray-100 border-transparent"
               }`}
               title={title}
             >
@@ -71,17 +79,17 @@ const StudentRow = ({ student, recentlyAddedId, onDeleteStudent }: StudentRowPro
 interface GroupTableProps {
   students: Student[];
   title: string;
+  month: string;
   recentlyAddedId: number | null;
   onDeleteStudent: (id: number) => void;
-  onDateChange?: (studentId: number, date: Date) => void; // Added this prop as optional
 }
 
 export const GroupTable = ({
   students,
   title,
+  month,
   recentlyAddedId,
   onDeleteStudent,
-  onDateChange, // Added this prop
 }: GroupTableProps) => (
   <div
     className="rounded-xl p-4 shadow-md border-2 bg-gradient-to-bl from-white/90 to-[#E5DEFF]/60 border-[#E5DEFF] transition-all hover:shadow-lg animate-fade-in group"
@@ -94,9 +102,7 @@ export const GroupTable = ({
           {title}
         </span>
       </h3>
-      <span className="text-sm text-gray-500">
-        {format(new Date(), 'MMMM d, yyyy')}
-      </span>
+      <span className="text-sm text-[#8B5CF6] font-bold">{month}</span>
     </div>
     {students.length === 0 ? (
       <p className="text-gray-400 italic text-center py-6 bg-gray-50/80 rounded-lg">
@@ -107,7 +113,7 @@ export const GroupTable = ({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="font-semibold text-[#1A1F2C]/70">Name</TableHead>
+              <TableHead className="font-semibold text-[#1A1F2C]/70">Full Name / Class</TableHead>
               <TableHead className="font-semibold text-[#1A1F2C]/70">Grade</TableHead>
               <TableHead />
             </TableRow>
