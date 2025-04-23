@@ -94,21 +94,18 @@ const Index = () => {
                 students={grades56Group}
                 recentlyAddedId={recentlyAddedId}
                 onDeleteStudent={handleDeleteStudent}
-                onDateChange={handleDateChange}
               />
               <GroupTable
                 title="Grades 7-8"
                 students={grades78Group}
                 recentlyAddedId={recentlyAddedId}
                 onDeleteStudent={handleDeleteStudent}
-                onDateChange={handleDateChange}
               />
               <GroupTable
                 title="Grades 9-11"
                 students={grades911Group}
                 recentlyAddedId={recentlyAddedId}
                 onDeleteStudent={handleDeleteStudent}
-                onDateChange={handleDateChange}
               />
             </div>
           </main>

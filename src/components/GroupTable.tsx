@@ -73,6 +73,7 @@ interface GroupTableProps {
   title: string;
   recentlyAddedId: number | null;
   onDeleteStudent: (id: number) => void;
+  onDateChange?: (studentId: number, date: Date) => void; // Added this prop as optional
 }
 
 export const GroupTable = ({
@@ -80,6 +81,7 @@ export const GroupTable = ({
   title,
   recentlyAddedId,
   onDeleteStudent,
+  onDateChange, // Added this prop
 }: GroupTableProps) => (
   <div
     className="rounded-xl p-4 shadow-md border-2 bg-gradient-to-bl from-white/90 to-[#E5DEFF]/60 border-[#E5DEFF] transition-all hover:shadow-lg animate-fade-in group"
