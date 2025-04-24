@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -49,7 +48,7 @@ export const StudentRow: React.FC<StudentRowProps> = ({
         recentlyAddedId === student.id ? "animate-scale-in bg-[#e7e4fb]" : ""
       }`}
     >
-      <td className="px-2 py-1 align-middle min-w-[140px]">
+      <td className="px-2 py-1 align-middle min-w-[200px]">
         <div className="flex flex-col gap-1">
           {editingNameId === student.id ? (
             <div className="flex gap-2 items-center">
@@ -78,7 +77,7 @@ export const StudentRow: React.FC<StudentRowProps> = ({
             </div>
           ) : (
             <div className="flex items-center gap-1">
-              <span className="truncate max-w-[120px]">{student.name || <span className="text-gray-300 italic">No name</span>}</span>
+              <span className="whitespace-nowrap">{student.name || <span className="text-gray-300 italic">No name</span>}</span>
               <Button
                 onClick={() => onEditStart(student.id, student.name)}
                 variant="ghost"
@@ -115,4 +114,3 @@ export const StudentRow: React.FC<StudentRowProps> = ({
     </tr>
   );
 };
-

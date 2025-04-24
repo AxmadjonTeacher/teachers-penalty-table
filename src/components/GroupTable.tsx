@@ -120,16 +120,23 @@ export const GroupTable = ({
         </p>
       ) : (
         <div className="overflow-x-auto">
+          <div className="flex justify-end mb-1 gap-4 pr-8">
+            {[0,1,2].map(idx => (
+              <DateHeader
+                key={idx}
+                date={dates[idx]}
+                onDateChange={val => handleDateChange(idx, val)}
+              />
+            ))}
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="font-semibold text-[#1A1F2C]/70 min-w-[140px] px-2 py-1">Full Name / Class</TableHead>
+                <TableHead className="font-semibold text-[#1A1F2C]/70 min-w-[200px] px-2 py-1">Full Name / Class</TableHead>
                 {[0,1,2].map(idx => (
-                  <TableHead key={idx} className="font-semibold text-[#1A1F2C]/70 min-w-[90px] text-center px-1 py-1">
-                    {/* Blank, handled by DateHeader above */}
-                  </TableHead>
+                  <TableHead key={idx} className="font-semibold text-[#1A1F2C]/70 min-w-[90px] text-center px-1 py-1" />
                 ))}
-                <TableHead className="px-1 py-1"></TableHead>
+                <TableHead className="px-1 py-1" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -159,4 +166,3 @@ export const GroupTable = ({
     </div>
   );
 };
-
