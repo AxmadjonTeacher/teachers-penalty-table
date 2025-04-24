@@ -48,7 +48,7 @@ export const StudentRow: React.FC<StudentRowProps> = ({
         recentlyAddedId === student.id ? "animate-scale-in bg-[#e7e4fb]" : ""
       }`}
     >
-      <td className="px-2 py-1 align-middle min-w-[200px]">
+      <td className="px-2 py-2 align-middle min-w-[200px]">
         <div className="flex flex-col gap-1">
           {editingNameId === student.id ? (
             <div className="flex gap-2 items-center">

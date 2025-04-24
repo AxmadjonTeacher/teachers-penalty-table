@@ -12,7 +12,7 @@ interface DateHeaderProps {
 }
 
 export const DateHeader: React.FC<DateHeaderProps> = ({ date, onDateChange }) => (
-  <div className="min-w-[90px] text-center">
+  <div className="min-w-[90px] text-center border-l border-r border-gray-200 px-2">
     <input
       type="date"
       value={date ? (date as Date).toISOString().split('T')[0] : ""}
@@ -20,7 +20,7 @@ export const DateHeader: React.FC<DateHeaderProps> = ({ date, onDateChange }) =>
       className="border px-2 rounded w-[95px] text-xs mb-1"
       placeholder="Date"
     />
-    <div className="text-xs text-gray-500 min-h-[18px]">
+    <div className="text-xs text-gray-500 min-h-[18px] font-medium">
       {formatDateHeader(date)}
     </div>
   </div>

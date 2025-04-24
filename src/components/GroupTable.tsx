@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StudentRow } from "./StudentRow";
@@ -41,7 +40,6 @@ export const GroupTable = ({
   const [editingNameValue, setEditingNameValue] = useState<string>("");
   const [notes, setNotes] = useState("");
 
-  // Date editing per cell
   const handleDateChange = (idx: number, value: string) => {
     setDates(prev => {
       const newDates = [...prev];
@@ -50,7 +48,6 @@ export const GroupTable = ({
     });
   };
 
-  // Grade selection per cell
   const handleGradeClick = (
     studentId: number,
     dateIdx: number,
@@ -71,7 +68,6 @@ export const GroupTable = ({
     });
   };
 
-  // Inline editing
   const startEdit = (id: number, name: string) => {
     setEditingNameId(id);
     setEditingNameValue(name);
@@ -101,42 +97,27 @@ export const GroupTable = ({
         </div>
       </div>
 
-      {/* Editable tracked dates above columns */}
-      <div className="flex justify-end mb-1">
-        <div className="flex gap-4">
-          {[0,1,2].map(idx =>
-            <DateHeader
-              key={idx}
-              date={dates[idx]}
-              onDateChange={val => handleDateChange(idx, val)}
-            />
-          )}
-        </div>
-      </div>
-
       {students.length === 0 ? (
         <p className="text-gray-400 italic text-center py-4 bg-gray-50/80 rounded-lg">
           No students in this group yet.
         </p>
       ) : (
         <div className="overflow-x-auto">
-          <div className="flex justify-end mb-1 gap-4 pr-8">
-            {[0,1,2].map(idx => (
-              <DateHeader
-                key={idx}
-                date={dates[idx]}
-                onDateChange={val => handleDateChange(idx, val)}
-              />
-            ))}
-          </div>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="font-semibold text-[#1A1F2C]/70 min-w-[200px] px-2 py-1">Full Name / Class</TableHead>
+                <TableHead className="font-semibold text-[#1A1F2C]/70 min-w-[200px] px-2 py-1">
+                  Full Name / Class
+                </TableHead>
                 {[0,1,2].map(idx => (
-                  <TableHead key={idx} className="font-semibold text-[#1A1F2C]/70 min-w-[90px] text-center px-1 py-1" />
+                  <TableHead key={idx} className="p-0 min-w-[90px]">
+                    <DateHeader
+                      date={dates[idx]}
+                      onDateChange={val => handleDateChange(idx, val)}
+                    />
+                  </TableHead>
                 ))}
-                <TableHead className="px-1 py-1" />
+                <TableHead className="px-1 py-1 w-[40px]" />
               </TableRow>
             </TableHeader>
             <TableBody>
