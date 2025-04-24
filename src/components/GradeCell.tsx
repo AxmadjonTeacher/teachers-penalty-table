@@ -12,11 +12,7 @@ interface GradeCellProps {
   studentId: number;
   dateIdx: number;
   selected: string[];
-  onGradeClick: (
-    studentId: number,
-    dateIdx: number,
-    value: string
-  ) => void;
+  onGradeClick: (studentId: number, dateIdx: number, value: string) => void;
 }
 
 export const GradeCell: React.FC<GradeCellProps> = ({
@@ -25,8 +21,8 @@ export const GradeCell: React.FC<GradeCellProps> = ({
   selected,
   onGradeClick,
 }) => (
-  <td className="text-center px-1 py-1">
-    <div className="flex flex-wrap gap-1 justify-center">
+  <td className="text-center px-4 py-2 border-l-2 border-gray-200">
+    <div className="flex gap-2 justify-center">
       {gradeButtons.map(({ value, color, title }) => (
         <button
           key={value}
@@ -45,4 +41,3 @@ export const GradeCell: React.FC<GradeCellProps> = ({
     </div>
   </td>
 );
-

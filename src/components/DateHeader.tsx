@@ -12,12 +12,12 @@ interface DateHeaderProps {
 }
 
 export const DateHeader: React.FC<DateHeaderProps> = ({ date, onDateChange }) => (
-  <div className="min-w-[90px] text-center border-l border-r border-gray-200 px-2">
+  <div className="min-w-[340px] text-center border-l-2 border-gray-200 px-4">
     <input
       type="date"
       value={date ? (date as Date).toISOString().split('T')[0] : ""}
       onChange={e => onDateChange(e.target.value)}
-      className="border px-2 rounded w-[95px] text-xs mb-1"
+      className="border px-2 rounded w-[140px] text-xs mb-1"
       placeholder="Date"
     />
     <div className="text-xs text-gray-500 min-h-[18px] font-medium">
