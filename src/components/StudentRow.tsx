@@ -48,7 +48,7 @@ export const StudentRow: React.FC<StudentRowProps> = ({
         recentlyAddedId === student.id ? "animate-scale-in bg-[#e7e4fb]" : ""
       }`}
     >
-      <td className="px-4 py-2 align-middle min-w-[240px] sticky left-0 bg-white">
+      <td className="px-3 py-2 align-middle min-w-[200px] sticky left-0 bg-white">
         <div className="flex flex-col gap-1">
           {editingNameId === student.id ? (
             <div className="flex gap-2 items-center">
@@ -105,7 +105,7 @@ export const StudentRow: React.FC<StudentRowProps> = ({
           onGradeClick={onGradeClick}
         />
       ))}
-      <td className="align-middle px-4 py-2 border-l-2 border-gray-200">
+      <td className="align-middle px-2 py-1 border-l-2 border-gray-200">
         <DeleteButton
           onClick={() => onDelete(student.id)}
           title="Delete student"
