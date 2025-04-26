@@ -102,19 +102,21 @@ const TeacherPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#8B5CF6]/10 to-white py-8 px-2 md:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
-        <header className="flex flex-col items-center gap-3 animate-fade-in">
-          <Link to="/" className="self-start">
-            <Button variant="outline" className="mb-4 gap-1">
-              <ChevronLeft className="h-4 w-4" /> Back to Teachers
-            </Button>
-          </Link>
-          
-          <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] via-[#7C3AED] to-[#6D28D9] tracking-tight drop-shadow">
-            Monitoring App
-          </h1>
-          <h2 className="text-2xl font-bold text-[#1A1F2C] mb-4">
-            {teacher.name}'s Groups
-          </h2>
+        <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm shadow-sm rounded-b-xl py-4">
+          <div className="flex flex-col items-center gap-3 animate-fade-in">
+            <Link to="/" className="self-start absolute left-4 top-4">
+              <Button variant="outline" className="mb-4 gap-1">
+                <ChevronLeft className="h-4 w-4" /> Back to Teachers
+              </Button>
+            </Link>
+            
+            <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] via-[#7C3AED] to-[#6D28D9] tracking-tight drop-shadow">
+              Monitoring App
+            </h1>
+            <h2 className="text-2xl font-bold text-[#1A1F2C] mb-4">
+              {teacher.name}'s Groups
+            </h2>
+          </div>
         </header>
         
         <aside className="w-full animate-scale-in p-6 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-[#8B5CF6]/20 hover:shadow-xl transition-all duration-300">
@@ -127,7 +129,7 @@ const TeacherPage = () => {
         
         <main className="w-full space-y-8">
           <Tabs defaultValue="grades-5-6" className="w-full">
-            <TabsList className="w-full mb-6 bg-white/70 p-1 shadow-sm">
+            <TabsList className="sticky top-[140px] z-40 w-full mb-6 bg-white/70 p-1 shadow-sm">
               {groups.map(group => (
                 <TabsTrigger 
                   key={group.value} 
@@ -140,7 +142,7 @@ const TeacherPage = () => {
             </TabsList>
             
             {groups.map(group => (
-              <TabsContent key={group.value} value={group.value}>
+              <TabsContent key={group.value} value={group.value} className="mt-0">
                 <GroupTable
                   title={group.title}
                   students={group.students}
