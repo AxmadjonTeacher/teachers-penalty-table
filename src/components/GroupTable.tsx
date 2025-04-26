@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StudentRow } from "./StudentRow";
@@ -6,6 +5,23 @@ import { DateHeader } from "./DateHeader";
 import { TeacherNotes } from "./TeacherNotes";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SearchBar } from "./SearchBar";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { DownloadIcon, FileSpreadsheet, FilePdf } from "lucide-react";
+import { jsPDF } from "jspdf";
+import * as XLSX from 'xlsx';
 
 interface Student {
   id: number;
@@ -37,12 +53,13 @@ export const GroupTable = ({
   onDeleteStudent,
   onEditStudentName,
 }: GroupTableProps) => {
-  const [dates, setDates] = useState<(Date | null)[]>([null, null, null]);
+  const [dates, setDates] = useState<(Date | null)[]>([null, null, null, null, null]);
   const [grades, setGrades] = useState<GradesState>({});
   const [editingNameId, setEditingNameId] = useState<number | null>(null);
   const [editingNameValue, setEditingNameValue] = useState<string>("");
   const [notes, setNotes] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const { isTeacher } = useAuth();
 
   const handleDateChange = (idx: number, value: string) => {
     setDates(prev => {
@@ -85,6 +102,51 @@ export const GroupTable = ({
     setEditingNameValue("");
   };
 
+  const handleResetGrades = () => {
+    setGrades({});
+    toast.success("All grades have been reset");
+  };
+
+  const exportToPDF = () => {
+    const pdf = new jsPDF();
+    const table = document.getElementById(`table-${title}`);
+    if (!table) return;
+    
+    pdf.text(title, 20, 10);
+    
+    let yPos = 30;
+    students.forEach((student, index) => {
+      const studentText = `${student.name} - ${
+        Object.entries(grades[student.id] || {})
+          .map(([dateIdx, gradeArr]) => `${dates[Number(dateIdx)]?.toLocaleDateString() || 'N/A'}: ${gradeArr.join(', ')}`)
+          .join(' | ')
+      }`;
+      pdf.text(studentText, 20, yPos);
+      yPos += 10;
+    });
+    
+    pdf.save(`${title}-grades.pdf`);
+    toast.success("PDF exported successfully");
+  };
+
+  const exportToExcel = () => {
+    const wb = XLSX.utils.book_new();
+    
+    const data = students.map(student => ({
+      Name: student.name,
+      Class: student.className || 'N/A',
+      ...Object.entries(grades[student.id] || {}).reduce((acc, [dateIdx, gradeArr]) => ({
+        ...acc,
+        [`${dates[Number(dateIdx)]?.toLocaleDateString() || 'N/A'}`]: gradeArr.join(', ')
+      }), {})
+    }));
+    
+    const ws = XLSX.utils.json_to_sheet(data);
+    XLSX.utils.book_append_sheet(wb, ws, title);
+    XLSX.writeFile(wb, `${title}-grades.xlsx`);
+    toast.success("Excel file exported successfully");
+  };
+
   const filteredStudents = students.filter(student => 
     student.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -92,9 +154,54 @@ export const GroupTable = ({
   return (
     <Card className="overflow-hidden border-[#E5DEFF] animate-fade-in shadow-lg rounded-xl">
       <CardHeader className="bg-[#F1F0FB] pb-3 pt-4">
-        <CardTitle className="text-xl font-semibold text-[#1A1F2C]">
-          {title}
-        </CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-xl font-semibold text-[#1A1F2C]">
+            {title}
+          </CardTitle>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={exportToPDF}
+              className="gap-2"
+            >
+              <FilePdf className="h-4 w-4" />
+              PDF
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={exportToExcel}
+              className="gap-2"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              Excel
+            </Button>
+            {isTeacher() && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    Reset Grades
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action will reset all grades while keeping student names. This cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleResetGrades}>
+                      Reset Grades
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="p-4">
         {students.length === 0 ? (
@@ -109,13 +216,13 @@ export const GroupTable = ({
               placeholder="Search students by name..."
             />
             <div className="overflow-x-auto rounded-lg border border-[#E5DEFF]">
-              <Table>
+              <Table id={`table-${title}`}>
                 <TableHeader className="sticky top-0 z-30 w-full">
                   <TableRow className="bg-gradient-to-r from-[#F1F0FB] to-[#F6F4FF] hover:bg-[#F1F0FB]/80">
                     <TableHead className="sticky left-0 z-20 font-semibold text-[#1A1F2C]/70 min-w-[200px] px-3 py-4 border-b bg-[#F1F0FB]">
                       Full Name / Class
                     </TableHead>
-                    {[0,1,2].map(idx => (
+                    {dates.map((_, idx) => (
                       <TableHead key={idx} className="p-0 min-w-[90px] border-b">
                         <DateHeader
                           date={dates[idx]}
