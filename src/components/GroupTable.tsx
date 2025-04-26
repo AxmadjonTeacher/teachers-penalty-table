@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StudentRow } from "./StudentRow";
@@ -109,9 +110,9 @@ export const GroupTable = ({
             />
             <div className="overflow-x-auto rounded-lg border border-[#E5DEFF]">
               <Table>
-                <TableHeader>
+                <TableHeader className="sticky top-0 z-30 w-full">
                   <TableRow className="bg-gradient-to-r from-[#F1F0FB] to-[#F6F4FF] hover:bg-[#F1F0FB]/80">
-                    <TableHead className="font-semibold text-[#1A1F2C]/70 min-w-[200px] px-3 py-4 border-b">
+                    <TableHead className="sticky left-0 z-20 font-semibold text-[#1A1F2C]/70 min-w-[200px] px-3 py-4 border-b bg-[#F1F0FB]">
                       Full Name / Class
                     </TableHead>
                     {[0,1,2].map(idx => (

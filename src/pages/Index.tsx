@@ -1,7 +1,8 @@
-
 import React, { useState, useEffect } from "react";
 import { TeachersList } from "@/components/TeachersList";
 import { TeacherForm } from "@/components/TeacherForm";
+import { LoginButton } from "@/components/LoginButton";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users } from "lucide-react";
@@ -14,6 +15,7 @@ interface Teacher {
 const Index = () => {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [recentlyAddedId, setRecentlyAddedId] = useState<string | null>(null);
+  const { isTeacher } = useAuth();
 
   useEffect(() => {
     const savedTeachers = localStorage.getItem("teachers");
@@ -41,6 +43,9 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-[#8B5CF6]/10 to-white py-8 px-2 md:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
         <header className="flex flex-col items-center gap-3 animate-fade-in">
+          <div className="self-end">
+            <LoginButton />
+          </div>
           <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] via-[#7C3AED] to-[#6D28D9] tracking-tight drop-shadow">
             Monitoring App
           </h1>
@@ -49,17 +54,19 @@ const Index = () => {
           </p>
         </header>
         
-        <Card className="w-full animate-scale-in p-6 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-[#8B5CF6]/20 hover:shadow-xl transition-all duration-300">
-          <CardHeader className="px-0 pt-0">
-            <CardTitle className="text-2xl font-semibold text-[#1A1F2C] flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-[#8B5CF6]" />
-              Add New Teacher
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-0 pb-0">
-            <TeacherForm onAddTeacher={handleAddTeacher} />
-          </CardContent>
-        </Card>
+        {isTeacher() && (
+          <Card className="w-full animate-scale-in p-6 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-[#8B5CF6]/20 hover:shadow-xl transition-all duration-300">
+            <CardHeader className="px-0 pt-0">
+              <CardTitle className="text-2xl font-semibold text-[#1A1F2C] flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-[#8B5CF6]" />
+                Add New Teacher
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-0 pb-0">
+              <TeacherForm onAddTeacher={handleAddTeacher} />
+            </CardContent>
+          </Card>
+        )}
         
         <main className="w-full space-y-8">
           <Card className="w-full bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-[#8B5CF6]/20">

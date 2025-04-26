@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { GroupTable } from "@/components/GroupTable";
 import { StudentForm } from "@/components/StudentForm";
 import { GradeLegend } from "@/components/GradeLegend";
+import { LoginButton } from "@/components/LoginButton";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { ChevronLeft } from "lucide-react";
 
@@ -23,6 +24,7 @@ interface Teacher {
 
 const TeacherPage = () => {
   const { teacherId } = useParams<{ teacherId: string }>();
+  const { isTeacher } = useAuth();
   const [teacher, setTeacher] = useState<Teacher | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
   const [recentlyAddedId, setRecentlyAddedId] = useState<number | null>(null);
@@ -71,7 +73,6 @@ const TeacherPage = () => {
     );
   };
 
-  // Groups
   const grades56Group = students.filter(
     (student) => student.proficiencyLevel === "Grades 5-6"
   );
@@ -104,11 +105,14 @@ const TeacherPage = () => {
       <div className="max-w-7xl mx-auto space-y-8">
         <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm shadow-sm rounded-b-xl py-4">
           <div className="flex flex-col items-center gap-3 animate-fade-in">
-            <Link to="/" className="self-start absolute left-4 top-4">
-              <Button variant="outline" className="mb-4 gap-1">
-                <ChevronLeft className="h-4 w-4" /> Back to Teachers
-              </Button>
-            </Link>
+            <div className="self-start w-full flex justify-between px-4">
+              <Link to="/">
+                <Button variant="outline" className="gap-1">
+                  <ChevronLeft className="h-4 w-4" /> Back to Teachers
+                </Button>
+              </Link>
+              <LoginButton />
+            </div>
             
             <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] via-[#7C3AED] to-[#6D28D9] tracking-tight drop-shadow">
               Monitoring App
@@ -119,13 +123,15 @@ const TeacherPage = () => {
           </div>
         </header>
         
-        <aside className="w-full animate-scale-in p-6 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-[#8B5CF6]/20 hover:shadow-xl transition-all duration-300">
-          <h2 className="text-2xl font-semibold mb-6 text-[#1A1F2C] flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-[#8B5CF6]" />
-            Add New Student
-          </h2>
-          <StudentForm onAddStudent={handleAddStudent} />
-        </aside>
+        {isTeacher() && (
+          <aside className="w-full animate-scale-in p-6 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-[#8B5CF6]/20 hover:shadow-xl transition-all duration-300">
+            <h2 className="text-2xl font-semibold mb-6 text-[#1A1F2C] flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-[#8B5CF6]" />
+              Add New Student
+            </h2>
+            <StudentForm onAddStudent={handleAddStudent} />
+          </aside>
+        )}
         
         <main className="w-full space-y-8">
           <Tabs defaultValue="grades-5-6" className="w-full">
