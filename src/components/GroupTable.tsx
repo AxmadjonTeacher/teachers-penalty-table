@@ -1,10 +1,10 @@
-
 import React, { useState } from "react";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StudentRow } from "./StudentRow";
 import { DateHeader } from "./DateHeader";
 import { TeacherNotes } from "./TeacherNotes";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SearchBar } from "./SearchBar";
 
 interface Student {
   id: number;
@@ -41,6 +41,7 @@ export const GroupTable = ({
   const [editingNameId, setEditingNameId] = useState<number | null>(null);
   const [editingNameValue, setEditingNameValue] = useState<string>("");
   const [notes, setNotes] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleDateChange = (idx: number, value: string) => {
     setDates(prev => {
@@ -83,59 +84,70 @@ export const GroupTable = ({
     setEditingNameValue("");
   };
 
+  const filteredStudents = students.filter(student => 
+    student.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <Card className="overflow-hidden border-[#E5DEFF] animate-fade-in shadow-md">
+    <Card className="overflow-hidden border-[#E5DEFF] animate-fade-in shadow-lg rounded-xl">
       <CardHeader className="bg-[#F1F0FB] pb-3 pt-4">
         <CardTitle className="text-xl font-semibold text-[#1A1F2C]">
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="p-4">
         {students.length === 0 ? (
           <p className="text-gray-400 italic text-center py-8 bg-white">
             No students in this group yet.
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <Table className="border-collapse">
-              <TableHeader>
-                <TableRow className="bg-gradient-to-r from-[#F1F0FB] to-[#F6F4FF]">
-                  <TableHead className="font-semibold text-[#1A1F2C]/70 min-w-[200px] px-3 py-3 border-b">
-                    Full Name / Class
-                  </TableHead>
-                  {[0,1,2].map(idx => (
-                    <TableHead key={idx} className="p-0 min-w-[90px] border-b">
-                      <DateHeader
-                        date={dates[idx]}
-                        onDateChange={val => handleDateChange(idx, val)}
-                      />
+          <div className="space-y-4">
+            <SearchBar 
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search students by name..."
+            />
+            <div className="overflow-x-auto rounded-lg border border-[#E5DEFF]">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gradient-to-r from-[#F1F0FB] to-[#F6F4FF] hover:bg-[#F1F0FB]/80">
+                    <TableHead className="font-semibold text-[#1A1F2C]/70 min-w-[200px] px-3 py-4 border-b">
+                      Full Name / Class
                     </TableHead>
+                    {[0,1,2].map(idx => (
+                      <TableHead key={idx} className="p-0 min-w-[90px] border-b">
+                        <DateHeader
+                          date={dates[idx]}
+                          onDateChange={val => handleDateChange(idx, val)}
+                        />
+                      </TableHead>
+                    ))}
+                    <TableHead className="px-1 py-1 w-[40px] border-b" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredStudents.map((student, idx) => (
+                    <StudentRow
+                      key={student.id}
+                      student={student}
+                      index={idx}
+                      dates={dates}
+                      grades={grades[student.id] || {}}
+                      recentlyAddedId={recentlyAddedId}
+                      editingNameId={editingNameId}
+                      editingNameValue={editingNameValue}
+                      onEditStart={startEdit}
+                      onEditSave={saveEdit}
+                      onEditCancel={cancelEdit}
+                      onNameChange={setEditingNameValue}
+                      onDelete={onDeleteStudent}
+                      onGradeClick={handleGradeClick}
+                    />
                   ))}
-                  <TableHead className="px-1 py-1 w-[40px] border-b" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {students.map((student, idx) => (
-                  <StudentRow
-                    key={student.id}
-                    student={student}
-                    index={idx}
-                    dates={dates}
-                    grades={grades[student.id] || {}}
-                    recentlyAddedId={recentlyAddedId}
-                    editingNameId={editingNameId}
-                    editingNameValue={editingNameValue}
-                    onEditStart={startEdit}
-                    onEditSave={saveEdit}
-                    onEditCancel={cancelEdit}
-                    onNameChange={setEditingNameValue}
-                    onDelete={onDeleteStudent}
-                    onGradeClick={handleGradeClick}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-            <div className="p-4 bg-white border-t border-gray-100">
+                </TableBody>
+              </Table>
+            </div>
+            <div className="p-4 bg-white border border-[#E5DEFF] rounded-lg">
               <TeacherNotes notes={notes} setNotes={setNotes} />
             </div>
           </div>
