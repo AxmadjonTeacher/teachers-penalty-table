@@ -1,8 +1,10 @@
+
 import React, { useState } from "react";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StudentRow } from "./StudentRow";
 import { DateHeader } from "./DateHeader";
 import { TeacherNotes } from "./TeacherNotes";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface Student {
   id: number;
@@ -82,68 +84,63 @@ export const GroupTable = ({
   };
 
   return (
-    <div className="rounded-xl p-4 shadow-md border-2 bg-gradient-to-bl from-white/90 to-[#E5DEFF]/60 border-[#E5DEFF] transition-all hover:shadow-lg animate-fade-in group mb-10">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-3 gap-2">
-        <div>
-          <h3 className="text-xl font-semibold flex items-center gap-2">
-            <span className="inline-block h-2 w-2 rounded-full bg-[#9b87f5]"></span>
-            <span className="tracking-tight group-hover:text-[#8B5CF6] transition-colors">
-              {title}
-            </span>
-          </h3>
-          <div className="text-sm font-medium text-[#8B5CF6] mt-1">
-            Teacher: <span className="font-bold">{teacherName || "—"}</span>
-          </div>
-        </div>
-      </div>
-
-      {students.length === 0 ? (
-        <p className="text-gray-400 italic text-center py-4 bg-gray-50/80 rounded-lg">
-          No students in this group yet.
-        </p>
-      ) : (
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="font-semibold text-[#1A1F2C]/70 min-w-[200px] px-2 py-1">
-                  Full Name / Class
-                </TableHead>
-                {[0,1,2].map(idx => (
-                  <TableHead key={idx} className="p-0 min-w-[90px]">
-                    <DateHeader
-                      date={dates[idx]}
-                      onDateChange={val => handleDateChange(idx, val)}
-                    />
+    <Card className="overflow-hidden border-[#E5DEFF] animate-fade-in shadow-md">
+      <CardHeader className="bg-[#F1F0FB] pb-3 pt-4">
+        <CardTitle className="text-xl font-semibold text-[#1A1F2C]">
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        {students.length === 0 ? (
+          <p className="text-gray-400 italic text-center py-8 bg-white">
+            No students in this group yet.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table className="border-collapse">
+              <TableHeader>
+                <TableRow className="bg-gradient-to-r from-[#F1F0FB] to-[#F6F4FF]">
+                  <TableHead className="font-semibold text-[#1A1F2C]/70 min-w-[200px] px-3 py-3 border-b">
+                    Full Name / Class
                   </TableHead>
+                  {[0,1,2].map(idx => (
+                    <TableHead key={idx} className="p-0 min-w-[90px] border-b">
+                      <DateHeader
+                        date={dates[idx]}
+                        onDateChange={val => handleDateChange(idx, val)}
+                      />
+                    </TableHead>
+                  ))}
+                  <TableHead className="px-1 py-1 w-[40px] border-b" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {students.map((student, idx) => (
+                  <StudentRow
+                    key={student.id}
+                    student={student}
+                    index={idx}
+                    dates={dates}
+                    grades={grades[student.id] || {}}
+                    recentlyAddedId={recentlyAddedId}
+                    editingNameId={editingNameId}
+                    editingNameValue={editingNameValue}
+                    onEditStart={startEdit}
+                    onEditSave={saveEdit}
+                    onEditCancel={cancelEdit}
+                    onNameChange={setEditingNameValue}
+                    onDelete={onDeleteStudent}
+                    onGradeClick={handleGradeClick}
+                  />
                 ))}
-                <TableHead className="px-1 py-1 w-[40px]" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {students.map((student, idx) => (
-                <StudentRow
-                  key={student.id}
-                  student={student}
-                  index={idx}
-                  dates={dates}
-                  grades={grades[student.id] || {}}
-                  recentlyAddedId={recentlyAddedId}
-                  editingNameId={editingNameId}
-                  editingNameValue={editingNameValue}
-                  onEditStart={startEdit}
-                  onEditSave={saveEdit}
-                  onEditCancel={cancelEdit}
-                  onNameChange={setEditingNameValue}
-                  onDelete={onDeleteStudent}
-                  onGradeClick={handleGradeClick}
-                />
-              ))}
-            </TableBody>
-          </Table>
-          <TeacherNotes notes={notes} setNotes={setNotes} />
-        </div>
-      )}
-    </div>
+              </TableBody>
+            </Table>
+            <div className="p-4 bg-white border-t border-gray-100">
+              <TeacherNotes notes={notes} setNotes={setNotes} />
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };

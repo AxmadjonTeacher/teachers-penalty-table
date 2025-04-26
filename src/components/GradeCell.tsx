@@ -21,7 +21,7 @@ export const GradeCell: React.FC<GradeCellProps> = ({
   selected,
   onGradeClick,
 }) => (
-  <td className="text-center px-2 py-1 border-l-2 border-gray-200">
+  <td className="text-center px-2 py-2 border-l-2 border-gray-200">
     <div className="flex gap-1 justify-center">
       {gradeButtons.map(({ value, color, title }) => (
         <button
@@ -30,8 +30,8 @@ export const GradeCell: React.FC<GradeCellProps> = ({
           onClick={() => onGradeClick(studentId, dateIdx, value)}
           className={`px-[6px] py-[2px] rounded border text-xs transition select-none
             ${selected.includes(value)
-              ? `${color} font-bold bg-gray-100 border-gray-300 scale-105`
-              : "text-gray-400 hover:bg-gray-100 border-transparent"
+              ? `${color} font-bold bg-gray-100 border-gray-300 scale-105 shadow-sm`
+              : "text-gray-400 hover:bg-gray-100 border-transparent hover:border-gray-200"
             }`}
           title={title}
         >
@@ -41,4 +41,3 @@ export const GradeCell: React.FC<GradeCellProps> = ({
     </div>
   </td>
 );
-
