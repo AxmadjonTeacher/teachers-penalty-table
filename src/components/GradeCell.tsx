@@ -13,6 +13,7 @@ interface GradeCellProps {
   dateIdx: number;
   selected: string[];
   onGradeClick: (studentId: number, dateIdx: number, value: string) => void;
+  isTeacher: boolean;
 }
 
 export const GradeCell: React.FC<GradeCellProps> = ({
@@ -20,6 +21,7 @@ export const GradeCell: React.FC<GradeCellProps> = ({
   dateIdx,
   selected,
   onGradeClick,
+  isTeacher,
 }) => (
   <td className="text-center px-2 py-2 border-l-2 border-gray-200">
     <div className="flex gap-1 justify-center">
@@ -27,13 +29,16 @@ export const GradeCell: React.FC<GradeCellProps> = ({
         <button
           key={value}
           type="button"
-          onClick={() => onGradeClick(studentId, dateIdx, value)}
+          onClick={() => isTeacher && onGradeClick(studentId, dateIdx, value)}
           className={`px-[6px] py-[2px] rounded border text-xs transition select-none
             ${selected.includes(value)
               ? `${color} font-bold bg-gray-100 border-gray-300 scale-105 shadow-sm`
-              : "text-gray-400 hover:bg-gray-100 border-transparent hover:border-gray-200"
+              : isTeacher 
+                ? "text-gray-400 hover:bg-gray-100 border-transparent hover:border-gray-200 cursor-pointer"
+                : "text-gray-400 border-transparent cursor-default"
             }`}
-          title={title}
+          title={isTeacher ? title : undefined}
+          disabled={!isTeacher}
         >
           {value}
         </button>
