@@ -19,7 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { DownloadIcon, FileSpreadsheet, FilePdf } from "lucide-react";
+import { FileSpreadsheet, FileText } from "lucide-react";
 import { jsPDF } from "jspdf";
 import * as XLSX from 'xlsx';
 
@@ -165,7 +165,7 @@ export const GroupTable = ({
               onClick={exportToPDF}
               className="gap-2"
             >
-              <FilePdf className="h-4 w-4" />
+              <FileText className="h-4 w-4" />
               PDF
             </Button>
             <Button
