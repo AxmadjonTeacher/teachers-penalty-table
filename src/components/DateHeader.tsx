@@ -22,7 +22,7 @@ export const DateHeader: React.FC<DateHeaderProps> = ({ date, onDateChange }) =>
         value={date ? (date as Date).toISOString().split('T')[0] : ""}
         onChange={e => onDateChange(e.target.value)}
         className={`border border-[#E5DEFF] px-2 py-1 rounded w-[120px] text-xs
-          ${isTeacher 
+          ${isTeacher() 
             ? "focus:outline-[#8B5CF6] focus:border-[#8B5CF6]" 
             : "bg-gray-50 cursor-not-allowed"}`}
         disabled={!isTeacher()}
