@@ -24,8 +24,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [role, setRole] = useState<Role>('viewer');
 
   const login = async (password: string) => {
-    // For demo purposes, using a simple password
-    if (password === '1234') {
+    // Using the new password
+    if (password === 'teacherme') {
       setRole('teacher');
       return true;
     }

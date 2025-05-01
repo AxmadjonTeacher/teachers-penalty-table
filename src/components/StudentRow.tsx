@@ -6,6 +6,7 @@ import { DeleteButton } from "@/components/ui/DeleteButton";
 import { GradeCell } from "./GradeCell";
 import { Check, X, Edit } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Student {
   id: number;
@@ -46,6 +47,7 @@ export const StudentRow: React.FC<StudentRowProps> = ({
   onGradeClick,
 }) => {
   const { isTeacher } = useAuth();
+  const isMobile = useIsMobile();
   
   return (
     <tr
@@ -53,37 +55,37 @@ export const StudentRow: React.FC<StudentRowProps> = ({
         recentlyAddedId === student.id ? "animate-scale-in bg-[#e7e4fb]" : ""
       }`}
     >
-      <td className="px-3 py-3 align-middle min-w-[250px] sticky left-0 bg-white z-20 shadow-sm">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex flex-col gap-1 w-full max-w-[180px]">
+      <td className={`px-2 md:px-3 py-2 md:py-3 align-middle min-w-[150px] md:min-w-[250px] sticky left-0 bg-white z-20 shadow-sm`}>
+        <div className="flex items-center justify-between gap-1 md:gap-2">
+          <div className="flex flex-col gap-1 w-full max-w-[120px] md:max-w-[180px]">
             {editingNameId === student.id ? (
-              <div className="flex gap-2 items-center">
+              <div className="flex gap-1 md:gap-2 items-center">
                 <Input
                   value={editingNameValue}
                   onChange={e => onNameChange(e.target.value)}
-                  className="h-7 w-full py-1 border-[#8B5CF6]/30 focus:border-[#8B5CF6]"
+                  className="h-6 md:h-7 w-full py-0 md:py-1 border-[#8B5CF6]/30 focus:border-[#8B5CF6]"
                 />
                 <Button
                   size="sm"
                   onClick={() => onEditSave(student.id)}
-                  className="px-2 py-1 bg-[#8B5CF6] hover:bg-[#7C3AED]"
+                  className="px-1 md:px-2 py-0 md:py-1 bg-[#8B5CF6] hover:bg-[#7C3AED]"
                   title="Save"
                 >
-                  <Check className="h-4 w-4" />
+                  <Check className="h-3 w-3 md:h-4 md:w-4" />
                 </Button>
                 <Button
                   size="sm"
                   variant="ghost"
                   onClick={onEditCancel}
-                  className="px-2 py-1 text-gray-400"
+                  className="px-1 md:px-2 py-0 md:py-1 text-gray-400"
                   title="Cancel"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-3 w-3 md:h-4 md:w-4" />
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <span className="whitespace-nowrap font-medium truncate">
+              <div className="flex items-center gap-1 md:gap-2">
+                <span className="whitespace-nowrap font-medium truncate text-xs md:text-sm">
                   {student.name || <span className="text-gray-300 italic">No name</span>}
                 </span>
                 {isTeacher() && (
@@ -91,16 +93,16 @@ export const StudentRow: React.FC<StudentRowProps> = ({
                     onClick={() => onEditStart(student.id, student.name)}
                     variant="ghost"
                     size="sm"
-                    className="px-1 py-1 text-xs text-[#8B5CF6] hover:text-[#7C3AED] hover:bg-[#8B5CF6]/10 flex-shrink-0"
+                    className="px-1 py-0 md:py-1 text-xs text-[#8B5CF6] hover:text-[#7C3AED] hover:bg-[#8B5CF6]/10 flex-shrink-0"
                     title="Edit"
                   >
-                    <Edit className="h-3 w-3" />
+                    <Edit className="h-2 w-2 md:h-3 md:w-3" />
                   </Button>
                 )}
               </div>
             )}
             {student.className && (
-              <span className="text-[11px] text-gray-400 truncate">
+              <span className="text-[10px] md:text-[11px] text-gray-400 truncate">
                 {student.className}
               </span>
             )}

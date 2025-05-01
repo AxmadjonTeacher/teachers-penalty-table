@@ -66,7 +66,7 @@ export const LoginButton = () => {
           <form onSubmit={handleLogin} className="space-y-4 mt-4">
             <Input
               type="password"
-              placeholder="Enter password (hint: 1234)"
+              placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
