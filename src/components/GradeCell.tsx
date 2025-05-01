@@ -23,7 +23,7 @@ export const GradeCell: React.FC<GradeCellProps> = ({
   onGradeClick,
   isTeacher,
 }) => (
-  <td className="text-center px-2 py-2 border-l-2 border-gray-200">
+  <td className="text-center px-2 py-2 border-l-2 border-gray-200 relative z-10">
     <div className="flex gap-1 justify-center">
       {gradeButtons.map(({ value, color, title }) => (
         <button

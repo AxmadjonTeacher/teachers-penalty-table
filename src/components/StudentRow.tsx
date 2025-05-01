@@ -53,9 +53,9 @@ export const StudentRow: React.FC<StudentRowProps> = ({
         recentlyAddedId === student.id ? "animate-scale-in bg-[#e7e4fb]" : ""
       }`}
     >
-      <td className="px-3 py-3 align-middle min-w-[250px] sticky left-0 bg-white">
+      <td className="px-3 py-3 align-middle min-w-[250px] sticky left-0 bg-white z-20 shadow-sm">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 w-full max-w-[180px]">
             {editingNameId === student.id ? (
               <div className="flex gap-2 items-center">
                 <Input
@@ -83,7 +83,7 @@ export const StudentRow: React.FC<StudentRowProps> = ({
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <span className="whitespace-nowrap font-medium">
+                <span className="whitespace-nowrap font-medium truncate">
                   {student.name || <span className="text-gray-300 italic">No name</span>}
                 </span>
                 {isTeacher() && (
@@ -91,7 +91,7 @@ export const StudentRow: React.FC<StudentRowProps> = ({
                     onClick={() => onEditStart(student.id, student.name)}
                     variant="ghost"
                     size="sm"
-                    className="px-1 py-1 text-xs text-[#8B5CF6] hover:text-[#7C3AED] hover:bg-[#8B5CF6]/10"
+                    className="px-1 py-1 text-xs text-[#8B5CF6] hover:text-[#7C3AED] hover:bg-[#8B5CF6]/10 flex-shrink-0"
                     title="Edit"
                   >
                     <Edit className="h-3 w-3" />
@@ -100,7 +100,7 @@ export const StudentRow: React.FC<StudentRowProps> = ({
               </div>
             )}
             {student.className && (
-              <span className="text-[11px] text-gray-400">
+              <span className="text-[11px] text-gray-400 truncate">
                 {student.className}
               </span>
             )}
