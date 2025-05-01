@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StudentRow } from "./StudentRow";
 import { DateHeader } from "./DateHeader";
@@ -22,6 +23,7 @@ import {
 import { FileSpreadsheet, FileText } from "lucide-react";
 import { jsPDF } from "jspdf";
 import * as XLSX from 'xlsx';
+import { GradesState, loadDates, loadGrades, loadNotes, saveDates, saveGrades, saveNotes } from "@/utils/gradeStorage";
 
 interface Student {
   id: number;
@@ -34,32 +36,44 @@ interface GroupTableProps {
   students: Student[];
   title: string;
   teacherName: string;
+  teacherId: string; // Add teacherId prop
   recentlyAddedId: number | null;
   onDeleteStudent: (id: number) => void;
   onEditStudentName: (id: number, newName: string) => void;
 }
 
-type GradesState = {
-  [studentId: number]: {
-    [dateIdx: number]: string[]
-  }
-};
-
 export const GroupTable = ({
   students,
   title,
   teacherName,
+  teacherId, // Use the teacherId prop
   recentlyAddedId,
   onDeleteStudent,
   onEditStudentName,
 }: GroupTableProps) => {
-  const [dates, setDates] = useState<(Date | null)[]>([null, null, null, null, null]);
-  const [grades, setGrades] = useState<GradesState>({});
+  // Load initial state from localStorage
+  const [dates, setDates] = useState<(Date | null)[]>(loadDates(teacherId, title));
+  const [grades, setGrades] = useState<GradesState>(loadGrades(teacherId, title));
+  const [notes, setNotes] = useState<string>(loadNotes(teacherId, title));
   const [editingNameId, setEditingNameId] = useState<number | null>(null);
   const [editingNameValue, setEditingNameValue] = useState<string>("");
-  const [notes, setNotes] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const { isTeacher } = useAuth();
+  
+  // Save dates to localStorage whenever they change
+  useEffect(() => {
+    saveDates(teacherId, title, dates);
+  }, [dates, teacherId, title]);
+  
+  // Save grades to localStorage whenever they change
+  useEffect(() => {
+    saveGrades(teacherId, title, grades);
+  }, [grades, teacherId, title]);
+  
+  // Save notes to localStorage whenever they change
+  useEffect(() => {
+    saveNotes(teacherId, title, notes);
+  }, [notes, teacherId, title]);
 
   const handleDateChange = (idx: number, value: string) => {
     setDates(prev => {

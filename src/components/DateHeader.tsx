@@ -25,7 +25,7 @@ export const DateHeader: React.FC<DateHeaderProps> = ({ date, onDateChange }) =>
           ${isTeacher 
             ? "focus:outline-[#8B5CF6] focus:border-[#8B5CF6]" 
             : "bg-gray-50 cursor-not-allowed"}`}
-        disabled={!isTeacher}
+        disabled={!isTeacher()}
       />
       <div className="text-xs text-gray-500 min-h-[16px] font-medium mt-1">
         {formatDateHeader(date)}

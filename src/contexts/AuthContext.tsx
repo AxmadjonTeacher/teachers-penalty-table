@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type Role = 'viewer' | 'teacher';
 
@@ -22,11 +22,21 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [role, setRole] = useState<Role>('viewer');
+  
+  // Load role from localStorage on initial load
+  useEffect(() => {
+    const savedRole = localStorage.getItem('userRole');
+    if (savedRole === 'teacher') {
+      setRole('teacher');
+    }
+  }, []);
 
   const login = async (password: string) => {
     // Using the new password
     if (password === 'teacherme') {
       setRole('teacher');
+      // Save role to localStorage
+      localStorage.setItem('userRole', 'teacher');
       return true;
     }
     return false;
@@ -34,6 +44,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setRole('viewer');
+    // Remove role from localStorage
+    localStorage.removeItem('userRole');
   };
 
   const isTeacher = () => role === 'teacher';

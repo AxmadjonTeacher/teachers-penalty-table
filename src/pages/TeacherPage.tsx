@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -153,6 +154,7 @@ const TeacherPage = () => {
                   title={group.title}
                   students={group.students}
                   teacherName={teacher.name}
+                  teacherId={teacherId || ''} // Pass teacherId to the GroupTable
                   recentlyAddedId={recentlyAddedId}
                   onDeleteStudent={handleDeleteStudent}
                   onEditStudentName={handleEditStudentName}
