@@ -9,6 +9,76 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      class_dates: {
+        Row: {
+          created_at: string | null
+          dates: string[]
+          group_name: string
+          id: string
+          teacher_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          dates?: string[]
+          group_name: string
+          id?: string
+          teacher_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          dates?: string[]
+          group_name?: string
+          id?: string
+          teacher_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_dates_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grades: {
+        Row: {
+          created_at: string | null
+          date: string
+          id: string
+          student_id: string | null
+          updated_at: string | null
+          values: string[]
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          id?: string
+          student_id?: string | null
+          updated_at?: string | null
+          values?: string[]
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          student_id?: string | null
+          updated_at?: string | null
+          values?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grades_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       "Monitoring App": {
         Row: {
           Content: string | null
@@ -24,6 +94,118 @@ export type Database = {
           Content?: string | null
           created_at?: string
           id?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: string | null
+          username: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id: string
+          role?: string | null
+          username?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      students: {
+        Row: {
+          class_name: string | null
+          created_at: string | null
+          id: string
+          name: string
+          proficiency_level: string
+          teacher_id: string | null
+        }
+        Insert: {
+          class_name?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+          proficiency_level: string
+          teacher_id?: string | null
+        }
+        Update: {
+          class_name?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+          proficiency_level?: string
+          teacher_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "students_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teacher_notes: {
+        Row: {
+          created_at: string | null
+          group_name: string
+          id: string
+          notes: string
+          teacher_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          group_name: string
+          id?: string
+          notes?: string
+          teacher_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          group_name?: string
+          id?: string
+          notes?: string
+          teacher_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_notes_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teachers: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          user_id?: string | null
         }
         Relationships: []
       }

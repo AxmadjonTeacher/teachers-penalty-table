@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { TeachersList } from "@/components/TeachersList";
 import { TeacherForm } from "@/components/TeacherForm";
@@ -6,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Teacher {
   id: string;
@@ -15,28 +17,83 @@ interface Teacher {
 const Index = () => {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [recentlyAddedId, setRecentlyAddedId] = useState<string | null>(null);
-  const { isTeacher } = useAuth();
+  const { isTeacher, user } = useAuth();
 
+  // Load teachers from Supabase if user is logged in, otherwise fallback to localStorage
   useEffect(() => {
-    const savedTeachers = localStorage.getItem("teachers");
-    if (savedTeachers) {
-      setTeachers(JSON.parse(savedTeachers));
-    }
-  }, []);
+    const fetchTeachers = async () => {
+      if (user) {
+        // Try to fetch from Supabase
+        try {
+          const { data, error } = await supabase
+            .from('teachers')
+            .select('id, name');
+            
+          if (error) {
+            throw error;
+          }
+          
+          if (data && data.length > 0) {
+            setTeachers(data as Teacher[]);
+            return;
+          }
+        } catch (error) {
+          console.error('Error fetching teachers from Supabase:', error);
+          toast.error('Failed to fetch teachers');
+        }
+      }
+      
+      // Fallback to localStorage if Supabase fetch fails or user is not logged in
+      const savedTeachers = localStorage.getItem("teachers");
+      if (savedTeachers) {
+        setTeachers(JSON.parse(savedTeachers));
+      }
+    };
+    
+    fetchTeachers();
+  }, [user]);
 
+  // Save to localStorage as a backup
   useEffect(() => {
     localStorage.setItem("teachers", JSON.stringify(teachers));
   }, [teachers]);
 
-  const handleAddTeacher = (name: string) => {
-    const newTeacher: Teacher = {
-      id: Date.now().toString(),
-      name,
-    };
-    setTeachers((prev) => [...prev, newTeacher]);
-    setRecentlyAddedId(newTeacher.id);
-    setTimeout(() => setRecentlyAddedId(null), 700);
-    toast.success("Teacher added successfully!");
+  const handleAddTeacher = async (name: string) => {
+    if (!user) {
+      // Fallback to localStorage if user is not logged in
+      const newTeacher: Teacher = {
+        id: Date.now().toString(),
+        name,
+      };
+      setTeachers((prev) => [...prev, newTeacher]);
+      setRecentlyAddedId(newTeacher.id);
+      setTimeout(() => setRecentlyAddedId(null), 700);
+      toast.success("Teacher added successfully!");
+      return;
+    }
+    
+    try {
+      // Add to Supabase if user is logged in
+      const { data, error } = await supabase
+        .from('teachers')
+        .insert([{ name, user_id: user.id }])
+        .select();
+        
+      if (error) {
+        throw error;
+      }
+      
+      if (data && data.length > 0) {
+        const newTeacher = data[0] as Teacher;
+        setTeachers((prev) => [...prev, newTeacher]);
+        setRecentlyAddedId(newTeacher.id);
+        setTimeout(() => setRecentlyAddedId(null), 700);
+        toast.success("Teacher added successfully!");
+      }
+    } catch (error) {
+      console.error('Error adding teacher to Supabase:', error);
+      toast.error('Failed to add teacher');
+    }
   };
 
   return (
