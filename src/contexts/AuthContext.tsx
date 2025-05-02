@@ -66,6 +66,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserRole = async (userId: string) => {
     try {
+      // Check localStorage first for backward compatibility
+      const storedRole = localStorage.getItem('userRole');
+      if (storedRole === 'teacher') {
+        setRole('teacher');
+        return;
+      }
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('role')
@@ -85,29 +92,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Backward compatibility with old auth system
+  // Teacher role function
   const login = async (password: string) => {
     // Using the hardcoded password for teacher role (for backward compatibility)
     if (password === 'teacherme') {
-      // If user is authenticated, update their role in the profiles table
-      if (user) {
-        try {
+      try {
+        // If user is authenticated, update their role in the profiles table
+        if (user) {
           const { error } = await supabase
             .from('profiles')
             .update({ role: 'teacher' })
             .eq('id', user.id);
 
-          if (error) throw error;
+          if (error) {
+            console.error('Error updating role in Supabase:', error);
+            // Fallback to localStorage if Supabase update fails
+            setRole('teacher');
+            localStorage.setItem('userRole', 'teacher');
+            return true;
+          }
+          
           setRole('teacher');
-          // Save role to localStorage for backward compatibility
+          // Also save to localStorage for backward compatibility
           localStorage.setItem('userRole', 'teacher');
           return true;
-        } catch (error) {
-          console.error('Error updating role:', error);
-          return false;
+        } else {
+          // Legacy behavior if no user is logged in
+          setRole('teacher');
+          localStorage.setItem('userRole', 'teacher');
+          return true;
         }
-      } else {
-        // Legacy behavior if no user is logged in
+      } catch (error) {
+        console.error('Error in login process:', error);
+        // Attempt localStorage fallback
         setRole('teacher');
         localStorage.setItem('userRole', 'teacher');
         return true;
@@ -124,10 +141,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast.success("Logged out successfully");
     } catch (error) {
       console.error('Error signing out:', error);
+      toast.error("Failed to log out");
     }
   };
 
-  const isTeacher = () => role === 'teacher';
+  const isTeacher = () => role === 'teacher' || localStorage.getItem('userRole') === 'teacher';
 
   return (
     <AuthContext.Provider value={{ 

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -29,13 +30,18 @@ export const LoginButton = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await login(password);
-    if (success) {
-      toast.success('Logged in as teacher');
-      setIsOpen(false);
-      setPassword('');
-    } else {
-      toast.error('Invalid password');
+    try {
+      const success = await login(password);
+      if (success) {
+        toast.success('Logged in as teacher');
+        setIsOpen(false);
+        setPassword('');
+      } else {
+        toast.error('Invalid password');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('An error occurred during login');
     }
   };
 
@@ -104,6 +110,9 @@ export const LoginButton = () => {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Login as Teacher</DialogTitle>
+            <DialogDescription>
+              Enter the teacher password to access additional features.
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleLogin} className="space-y-4 mt-4">
             <Input
