@@ -50,6 +50,11 @@ const TeacherPage = () => {
   }, [students, teacherId]);
 
   const handleAddStudent = (name: string, proficiencyLevel: string, className?: string) => {
+    if (!isTeacher()) {
+      toast.error("You need teacher access to add new students");
+      return;
+    }
+    
     const newStudent: Student = {
       id: Date.now(),
       name,
@@ -63,11 +68,21 @@ const TeacherPage = () => {
   };
 
   const handleDeleteStudent = (id: number) => {
+    if (!isTeacher()) {
+      toast.error("You need teacher access to delete students");
+      return;
+    }
+    
     setStudents((prev) => prev.filter((stu) => stu.id !== id));
     toast.success("Student removed.");
   };
 
   const handleEditStudentName = (id: number, newName: string) => {
+    if (!isTeacher()) {
+      toast.error("You need teacher access to edit student names");
+      return;
+    }
+    
     setStudents((prev) =>
       prev.map((stu) => (stu.id === id ? { ...stu, name: newName } : stu))
     );
@@ -99,6 +114,16 @@ const TeacherPage = () => {
       </div>
     );
   }
+
+  // Display view-only notification for non-teacher users
+  useEffect(() => {
+    if (!isTeacher()) {
+      toast.info("You are in view-only mode. Login as teacher to make changes.", {
+        duration: 5000,
+        id: "view-only-mode" // Prevent duplicate toasts
+      });
+    }
+  }, [isTeacher]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#8B5CF6]/10 to-white py-8 px-2 md:px-8">

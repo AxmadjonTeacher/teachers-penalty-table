@@ -59,6 +59,11 @@ const Index = () => {
   }, [teachers]);
 
   const handleAddTeacher = async (name: string) => {
+    if (!isTeacher()) {
+      toast.error("You need teacher access to add new teachers");
+      return;
+    }
+    
     if (!user) {
       // Fallback to localStorage if user is not logged in
       const newTeacher: Teacher = {

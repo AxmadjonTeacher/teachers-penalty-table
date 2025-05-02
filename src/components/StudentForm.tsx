@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { useAuth } from '@/contexts/AuthContext';
 
 interface StudentFormProps {
   onAddStudent: (name: string, proficiencyLevel: string) => void;
@@ -13,10 +14,16 @@ interface StudentFormProps {
 export const StudentForm = ({ onAddStudent }: StudentFormProps) => {
   const [name, setName] = useState("");
   const [proficiencyLevel, setProficiencyLevel] = useState("");
+  const { isTeacher } = useAuth();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!isTeacher()) {
+      toast.error("You need teacher access to add new students");
+      return;
+    }
+
     if (!name.trim()) {
       toast.error("Please enter a student name");
       return;
@@ -45,13 +52,14 @@ export const StudentForm = ({ onAddStudent }: StudentFormProps) => {
           onChange={(e) => setName(e.target.value)}
           placeholder="Enter student's full name"
           className="h-12 text-lg bg-white/80 backdrop-blur-sm border-white/20"
+          disabled={!isTeacher()}
         />
       </div>
       <div className="space-y-2">
         <Label htmlFor="proficiency" className="text-[#1A1F2C] font-medium">
           Grade Level
         </Label>
-        <Select value={proficiencyLevel} onValueChange={setProficiencyLevel}>
+        <Select value={proficiencyLevel} onValueChange={setProficiencyLevel} disabled={!isTeacher()}>
           <SelectTrigger className="h-12 text-lg bg-white/80 backdrop-blur-sm border-white/20">
             <SelectValue placeholder="Select grade level" />
           </SelectTrigger>
@@ -62,7 +70,11 @@ export const StudentForm = ({ onAddStudent }: StudentFormProps) => {
           </SelectContent>
         </Select>
       </div>
-      <Button type="submit" className="w-full h-12 text-lg bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors">
+      <Button 
+        type="submit" 
+        className="w-full h-12 text-lg bg-[#9b87f5] hover:bg-[#7E69AB] transition-colors"
+        disabled={!isTeacher()}
+      >
         Add Student
       </Button>
     </form>
