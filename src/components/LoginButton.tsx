@@ -27,9 +27,12 @@ export const LoginButton = () => {
   const { user, role, login, logout, isTeacher } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    
     try {
       const success = await login(password);
       if (success) {
@@ -42,6 +45,8 @@ export const LoginButton = () => {
     } catch (error) {
       console.error('Login error:', error);
       toast.error('An error occurred during login');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -121,9 +126,13 @@ export const LoginButton = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <Button type="submit" className="w-full gap-2">
+            <Button 
+              type="submit" 
+              className="w-full gap-2" 
+              disabled={isSubmitting}
+            >
               <LockOpen className="h-4 w-4" />
-              Become Teacher
+              {isSubmitting ? 'Processing...' : 'Become Teacher'}
             </Button>
           </form>
         </DialogContent>

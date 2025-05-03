@@ -43,7 +43,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             fetchUserRole(session.user.id);
           }, 0);
         } else {
-          setRole('viewer');
+          // Check localStorage for role (for backward compatibility)
+          const storedRole = localStorage.getItem('userRole');
+          setRole(storedRole === 'teacher' ? 'teacher' : 'viewer');
         }
       }
     );
@@ -56,6 +58,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // If session exists, fetch the user's role
       if (session?.user) {
         fetchUserRole(session.user.id);
+      } else {
+        // Check localStorage for role (for backward compatibility)
+        const storedRole = localStorage.getItem('userRole');
+        setRole(storedRole === 'teacher' ? 'teacher' : 'viewer');
       }
       
       setLoading(false);
@@ -92,7 +98,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Teacher role function
+  // Teacher role function - fixed to properly set and persist role
   const login = async (password: string) => {
     // Using the hardcoded password for teacher role (for backward compatibility)
     if (password === 'teacherme') {
@@ -106,22 +112,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
           if (error) {
             console.error('Error updating role in Supabase:', error);
-            // Fallback to localStorage if Supabase update fails
-            setRole('teacher');
-            localStorage.setItem('userRole', 'teacher');
-            return true;
           }
-          
-          setRole('teacher');
-          // Also save to localStorage for backward compatibility
-          localStorage.setItem('userRole', 'teacher');
-          return true;
-        } else {
-          // Legacy behavior if no user is logged in
-          setRole('teacher');
-          localStorage.setItem('userRole', 'teacher');
-          return true;
         }
+        
+        // Always set local state and localStorage
+        setRole('teacher');
+        localStorage.setItem('userRole', 'teacher');
+        return true;
       } catch (error) {
         console.error('Error in login process:', error);
         // Attempt localStorage fallback
@@ -145,7 +142,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const isTeacher = () => role === 'teacher' || localStorage.getItem('userRole') === 'teacher';
+  const isTeacher = () => {
+    return role === 'teacher' || localStorage.getItem('userRole') === 'teacher';
+  };
 
   return (
     <AuthContext.Provider value={{ 
