@@ -9,6 +9,7 @@ import { SearchBar } from "./SearchBar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,7 +37,7 @@ interface GroupTableProps {
   students: Student[];
   title: string;
   teacherName: string;
-  teacherId: string; // Add teacherId prop
+  teacherId: string;
   recentlyAddedId: number | null;
   onDeleteStudent: (id: number) => void;
   onEditStudentName: (id: number, newName: string) => void;
@@ -46,7 +47,7 @@ export const GroupTable = ({
   students,
   title,
   teacherName,
-  teacherId, // Use the teacherId prop
+  teacherId,
   recentlyAddedId,
   onDeleteStudent,
   onEditStudentName,
@@ -59,6 +60,7 @@ export const GroupTable = ({
   const [editingNameValue, setEditingNameValue] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
   const { isTeacher } = useAuth();
+  const isMobile = useIsMobile();
   
   // Save dates to localStorage whenever they change
   useEffect(() => {
@@ -107,10 +109,12 @@ export const GroupTable = ({
     setEditingNameId(id);
     setEditingNameValue(name);
   };
+  
   const saveEdit = (id: number) => {
     onEditStudentName(id, editingNameValue.trim());
     setEditingNameId(null);
   };
+  
   const cancelEdit = () => {
     setEditingNameId(null);
     setEditingNameValue("");
@@ -129,7 +133,7 @@ export const GroupTable = ({
     pdf.text(title, 20, 10);
     
     let yPos = 30;
-    students.forEach((student, index) => {
+    students.forEach((student) => {
       const studentText = `${student.name} - ${
         Object.entries(grades[student.id] || {})
           .map(([dateIdx, gradeArr]) => `${dates[Number(dateIdx)]?.toLocaleDateString() || 'N/A'}: ${gradeArr.join(', ')}`)
@@ -167,35 +171,38 @@ export const GroupTable = ({
 
   return (
     <Card className="overflow-hidden border-[#E5DEFF] animate-fade-in shadow-lg rounded-xl">
-      <CardHeader className="bg-[#F1F0FB] pb-3 pt-4">
-        <div className="flex justify-between items-center">
+      <CardHeader className={`bg-[#F1F0FB] pb-3 pt-4 ${isMobile ? 'px-3' : ''}`}>
+        <div className={`flex ${isMobile ? 'flex-col gap-3' : 'justify-between items-center'}`}>
           <CardTitle className="text-xl font-semibold text-[#1A1F2C]">
             {title}
           </CardTitle>
-          <div className="flex gap-2">
+          <div className={`flex ${isMobile ? 'w-full justify-between' : 'gap-2'}`}>
             <Button
               variant="outline"
-              size="sm"
+              size={isMobile ? "sm" : "default"}
               onClick={exportToPDF}
-              className="gap-2"
+              className="gap-1"
             >
               <FileText className="h-4 w-4" />
-              PDF
+              {!isMobile && "PDF"}
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              size={isMobile ? "sm" : "default"}
               onClick={exportToExcel}
-              className="gap-2"
+              className="gap-1"
             >
               <FileSpreadsheet className="h-4 w-4" />
-              Excel
+              {!isMobile && "Excel"}
             </Button>
             {isTeacher() && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" size="sm">
-                    Reset Grades
+                  <Button 
+                    variant="destructive" 
+                    size={isMobile ? "sm" : "default"}
+                  >
+                    Reset
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -217,7 +224,7 @@ export const GroupTable = ({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="p-4">
+      <CardContent className={`p-4 ${isMobile ? 'px-2' : ''}`}>
         {students.length === 0 ? (
           <p className="text-gray-400 italic text-center py-8 bg-white">
             No students in this group yet.
@@ -229,47 +236,54 @@ export const GroupTable = ({
               onChange={setSearchQuery}
               placeholder="Search students by name..."
             />
-            <div className="overflow-x-auto rounded-lg border border-[#E5DEFF]">
-              <Table id={`table-${title}`}>
-                <TableHeader className="sticky top-0 z-30 w-full">
-                  <TableRow className="bg-gradient-to-r from-[#F1F0FB] to-[#F6F4FF] hover:bg-[#F1F0FB]/80">
-                    <TableHead className="sticky left-0 z-20 font-semibold text-[#1A1F2C]/70 min-w-[200px] px-3 py-4 border-b bg-[#F1F0FB]">
-                      Full Name / Class
-                    </TableHead>
-                    {dates.map((_, idx) => (
-                      <TableHead key={idx} className="p-0 min-w-[90px] border-b">
-                        <DateHeader
-                          date={dates[idx]}
-                          onDateChange={val => handleDateChange(idx, val)}
-                        />
+            <div className="overflow-x-auto rounded-lg border border-[#E5DEFF] -mx-2 md:mx-0">
+              <div className="min-w-[600px]"> {/* Ensure minimum width for small screens */}
+                <Table id={`table-${title}`}>
+                  <TableHeader className="sticky top-0 z-30 w-full">
+                    <TableRow className="bg-gradient-to-r from-[#F1F0FB] to-[#F6F4FF] hover:bg-[#F1F0FB]/80">
+                      <TableHead className="sticky left-0 z-20 font-semibold text-[#1A1F2C]/70 min-w-[200px] px-3 py-4 border-b bg-[#F1F0FB]">
+                        Full Name / Class
                       </TableHead>
+                      {dates.map((_, idx) => (
+                        <TableHead key={idx} className="p-0 min-w-[90px] border-b">
+                          <DateHeader
+                            date={dates[idx]}
+                            onDateChange={val => handleDateChange(idx, val)}
+                          />
+                        </TableHead>
+                      ))}
+                      <TableHead className="px-1 py-1 w-[40px] border-b" />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredStudents.map((student, idx) => (
+                      <StudentRow
+                        key={student.id}
+                        student={student}
+                        index={idx}
+                        dates={dates}
+                        grades={grades[student.id] || {}}
+                        recentlyAddedId={recentlyAddedId}
+                        editingNameId={editingNameId}
+                        editingNameValue={editingNameValue}
+                        onEditStart={startEdit}
+                        onEditSave={saveEdit}
+                        onEditCancel={cancelEdit}
+                        onNameChange={setEditingNameValue}
+                        onDelete={onDeleteStudent}
+                        onGradeClick={handleGradeClick}
+                      />
                     ))}
-                    <TableHead className="px-1 py-1 w-[40px] border-b" />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredStudents.map((student, idx) => (
-                    <StudentRow
-                      key={student.id}
-                      student={student}
-                      index={idx}
-                      dates={dates}
-                      grades={grades[student.id] || {}}
-                      recentlyAddedId={recentlyAddedId}
-                      editingNameId={editingNameId}
-                      editingNameValue={editingNameValue}
-                      onEditStart={startEdit}
-                      onEditSave={saveEdit}
-                      onEditCancel={cancelEdit}
-                      onNameChange={setEditingNameValue}
-                      onDelete={onDeleteStudent}
-                      onGradeClick={handleGradeClick}
-                    />
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableBody>
+                </Table>
+              </div>
+              {isMobile && (
+                <div className="bg-[#F1F0FB]/70 p-2 text-xs text-center">
+                  Scroll horizontally to view all data
+                </div>
+              )}
             </div>
-            <div className="p-4 bg-white border border-[#E5DEFF] rounded-lg">
+            <div className={`p-4 bg-white border border-[#E5DEFF] rounded-lg ${isMobile ? 'px-3' : ''}`}>
               <TeacherNotes notes={notes} setNotes={setNotes} />
             </div>
           </div>

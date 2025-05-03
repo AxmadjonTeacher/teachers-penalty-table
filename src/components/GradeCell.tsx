@@ -28,13 +28,13 @@ export const GradeCell: React.FC<GradeCellProps> = ({
   
   return (
     <td className="text-center px-1 py-1 md:px-2 md:py-2 border-l-2 border-gray-200 relative z-10">
-      <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} gap-1 justify-center`}>
+      <div className={`flex flex-row gap-1 justify-center ${isMobile ? 'flex-wrap' : ''}`}>
         {gradeButtons.map(({ value, color, title }) => (
           <button
             key={value}
             type="button"
             onClick={() => isTeacher && onGradeClick(studentId, dateIdx, value)}
-            className={`${isMobile ? 'px-[5px] py-[1px]' : 'px-[6px] py-[2px]'} rounded border text-xs transition select-none
+            className={`${isMobile ? 'w-6 h-6 flex items-center justify-center' : 'px-[6px] py-[2px]'} rounded border text-xs transition select-none
               ${selected.includes(value)
                 ? `${color} font-bold bg-gray-100 border-gray-300 ${isMobile ? 'scale-100' : 'scale-105'} shadow-sm`
                 : isTeacher 
@@ -43,6 +43,7 @@ export const GradeCell: React.FC<GradeCellProps> = ({
               }`}
             title={isTeacher ? title : undefined}
             disabled={!isTeacher}
+            aria-label={title}
           >
             {value}
           </button>
