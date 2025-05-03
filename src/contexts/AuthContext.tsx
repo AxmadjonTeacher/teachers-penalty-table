@@ -34,6 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -52,6 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -75,10 +77,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Check localStorage first for backward compatibility
       const storedRole = localStorage.getItem('userRole');
       if (storedRole === 'teacher') {
+        console.log('Setting role to teacher from localStorage');
         setRole('teacher');
         return;
       }
       
+      console.log('Fetching user role from Supabase for user ID:', userId);
       const { data, error } = await supabase
         .from('profiles')
         .select('role')
@@ -91,7 +95,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (data) {
+        console.log('Role from Supabase:', data.role);
         setRole(data.role);
+        // Also update localStorage
+        if (data.role === 'teacher') {
+          localStorage.setItem('userRole', 'teacher');
+        }
       }
     } catch (error) {
       console.error('Failed to fetch user role:', error);
@@ -100,11 +109,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Teacher role function - fixed to properly set and persist role
   const login = async (password: string) => {
-    // Using the hardcoded password for teacher role (for backward compatibility)
+    console.log('Attempting login with password');
+    // Using the hardcoded password for teacher role
     if (password === 'teacherme') {
       try {
+        console.log('Password correct, setting teacher role');
         // If user is authenticated, update their role in the profiles table
         if (user) {
+          console.log('Updating role in Supabase for user:', user.id);
           const { error } = await supabase
             .from('profiles')
             .update({ role: 'teacher' })
@@ -116,6 +128,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         
         // Always set local state and localStorage
+        console.log('Setting role to teacher in state and localStorage');
         setRole('teacher');
         localStorage.setItem('userRole', 'teacher');
         return true;
@@ -127,6 +140,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return true;
       }
     }
+    console.log('Password incorrect');
     return false;
   };
 
@@ -143,6 +157,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const isTeacher = () => {
+    // Check both state and localStorage to ensure consistency
     return role === 'teacher' || localStorage.getItem('userRole') === 'teacher';
   };
 
