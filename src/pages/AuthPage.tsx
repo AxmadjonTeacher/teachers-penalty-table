@@ -10,6 +10,18 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { 
+  RadioGroup, 
+  RadioGroupItem 
+} from "@/components/ui/radio-group";
+import { Lock, User } from "lucide-react";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogHeader, 
+  DialogTitle 
+} from "@/components/ui/dialog";
 
 const AuthPage = () => {
   const [email, setEmail] = useState("");
@@ -17,8 +29,11 @@ const AuthPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedRole, setSelectedRole] = useState("viewer");
+  const [teacherPasswordOpen, setTeacherPasswordOpen] = useState(false);
+  const [teacherPassword, setTeacherPassword] = useState("");
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, login } = useAuth();
 
   useEffect(() => {
     // Redirect if user is already logged in
@@ -26,6 +41,18 @@ const AuthPage = () => {
       navigate("/");
     }
   }, [user, navigate]);
+
+  const verifyTeacherRole = async () => {
+    if (teacherPassword === "teacherme") {
+      toast.success("Teacher role verified");
+      localStorage.setItem("userRole", "teacher");
+      setTeacherPasswordOpen(false);
+      return true;
+    } else {
+      toast.error("Invalid teacher password");
+      return false;
+    }
+  };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,11 +69,22 @@ const AuthPage = () => {
       return;
     }
 
+    // If teacher role is selected, verify password first
+    if (selectedRole === "teacher") {
+      const verified = await verifyTeacherRole();
+      if (!verified) return;
+    }
+
     setLoading(true);
     try {
       const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            role: selectedRole,
+          }
+        }
       });
 
       if (error) throw error;
@@ -67,6 +105,12 @@ const AuthPage = () => {
     if (!email || !password) {
       setError("Email and password are required");
       return;
+    }
+
+    // If teacher role is selected, verify password first
+    if (selectedRole === "teacher") {
+      const verified = await verifyTeacherRole();
+      if (!verified) return;
     }
 
     setLoading(true);
@@ -95,6 +139,36 @@ const AuthPage = () => {
           <CardDescription>Login or create an account to access your dashboard</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-6">
+            <Label className="text-sm font-medium mb-2 block">Select your role</Label>
+            <RadioGroup 
+              defaultValue="viewer" 
+              value={selectedRole} 
+              onValueChange={(value) => {
+                setSelectedRole(value);
+                if (value === "teacher") {
+                  setTeacherPasswordOpen(true);
+                }
+              }}
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="viewer" id="viewer" />
+                <Label htmlFor="viewer" className="flex items-center gap-2">
+                  <User size={16} />
+                  Viewer
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="teacher" id="teacher" />
+                <Label htmlFor="teacher" className="flex items-center gap-2">
+                  <Lock size={16} />
+                  Teacher
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+          
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="login">Login</TabsTrigger>
@@ -180,6 +254,52 @@ const AuthPage = () => {
           Monitoring App — All rights reserved
         </CardFooter>
       </Card>
+
+      {/* Teacher Password Dialog */}
+      <Dialog open={teacherPasswordOpen} onOpenChange={setTeacherPasswordOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Teacher Verification</DialogTitle>
+            <DialogDescription>
+              Please enter the teacher password to access teacher features.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="teacher-password">Teacher Password</Label>
+              <Input
+                id="teacher-password"
+                type="password"
+                placeholder="Enter password"
+                value={teacherPassword}
+                onChange={(e) => setTeacherPassword(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setTeacherPasswordOpen(false);
+                setSelectedRole("viewer");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={async () => {
+                const verified = await verifyTeacherRole();
+                if (!verified) {
+                  setSelectedRole("viewer");
+                }
+              }}
+              className="bg-[#8B5CF6] hover:bg-[#7C3AED]"
+            >
+              Verify
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

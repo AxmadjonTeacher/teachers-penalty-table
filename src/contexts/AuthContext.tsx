@@ -107,7 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Teacher role function - fixed to properly set and persist role
+  // Teacher role function - for verifying teacher password
   const login = async (password: string) => {
     console.log('Attempting login with password');
     // Using the hardcoded password for teacher role
