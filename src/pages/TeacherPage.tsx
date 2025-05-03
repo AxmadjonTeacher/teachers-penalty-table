@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -29,6 +30,7 @@ const TeacherPage = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [recentlyAddedId, setRecentlyAddedId] = useState<number | null>(null);
 
+  // Load teacher data - this hook always runs
   useEffect(() => {
     const savedTeachers = localStorage.getItem("teachers");
     if (savedTeachers) {
@@ -43,11 +45,22 @@ const TeacherPage = () => {
     }
   }, [teacherId]);
 
+  // Save students data - this hook always runs, but operation inside may be conditional
   useEffect(() => {
     if (students.length > 0) {
       localStorage.setItem(`students_${teacherId}`, JSON.stringify(students));
     }
   }, [students, teacherId]);
+
+  // Display view-only notification for non-teacher users - always runs regardless of teacher existence
+  useEffect(() => {
+    if (!isTeacher()) {
+      toast.info("You are in view-only mode. Login as teacher to make changes.", {
+        duration: 5000,
+        id: "view-only-mode" // Prevent duplicate toasts
+      });
+    }
+  }, [isTeacher]);
 
   const handleAddStudent = (name: string, proficiencyLevel: string, className?: string) => {
     if (!isTeacher()) {
@@ -88,6 +101,18 @@ const TeacherPage = () => {
     );
   };
 
+  // If teacher not found, render error message
+  if (!teacher) {
+    return (
+      <div className="p-8 text-center">
+        <p className="mb-4">Teacher not found</p>
+        <Button asChild>
+          <Link to="/">Go Home</Link>
+        </Button>
+      </div>
+    );
+  }
+
   const grades56Group = students.filter(
     (student) => student.proficiencyLevel === "Grades 5-6"
   );
@@ -103,27 +128,6 @@ const TeacherPage = () => {
     { title: "Grades 7-8", value: "grades-7-8", students: grades78Group },
     { title: "Grades 9-11", value: "grades-9-11", students: grades911Group }
   ];
-
-  if (!teacher) {
-    return (
-      <div className="p-8 text-center">
-        <p className="mb-4">Teacher not found</p>
-        <Button asChild>
-          <Link to="/">Go Home</Link>
-        </Button>
-      </div>
-    );
-  }
-
-  // Display view-only notification for non-teacher users
-  useEffect(() => {
-    if (!isTeacher()) {
-      toast.info("You are in view-only mode. Login as teacher to make changes.", {
-        duration: 5000,
-        id: "view-only-mode" // Prevent duplicate toasts
-      });
-    }
-  }, [isTeacher]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#8B5CF6]/10 to-white py-8 px-2 md:px-8">
