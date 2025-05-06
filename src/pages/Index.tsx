@@ -27,7 +27,7 @@ const Index = () => {
         try {
           const { data, error } = await supabase
             .from('teachers')
-            .select('id, name');
+            .select('id, name, user_id');
             
           if (error) {
             throw error;

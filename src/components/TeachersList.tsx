@@ -47,6 +47,11 @@ export const TeachersList: React.FC<TeachersListProps> = ({ teachers, onDeleteTe
                 <CardTitle className="text-xl flex items-center gap-2">
                   <User className="h-5 w-5 text-[#8B5CF6]" />
                   {teacher.name || "Unnamed Teacher"}
+                  {canManageTeacher(teacher.id) && (
+                    <span className="bg-[#8B5CF6]/10 text-[#8B5CF6] text-xs px-2 py-0.5 rounded-full">
+                      Yours
+                    </span>
+                  )}
                 </CardTitle>
                 {isTeacher() && onDeleteTeacher && canManageTeacher(teacher.id) && (
                   <AlertDialog>

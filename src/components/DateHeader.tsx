@@ -1,7 +1,7 @@
 
 import React from "react";
 import { format } from "date-fns";
-import { Calendar } from "lucide-react";
+import { Calendar, LockIcon } from "lucide-react";
 
 interface DateHeaderProps {
   date: Date | null;
@@ -24,8 +24,9 @@ export const DateHeader: React.FC<DateHeaderProps> = ({
       </div>
       
       {readOnly ? (
-        <div className="border rounded px-2 py-1 text-xs text-gray-600 bg-gray-50">
-          {date ? formattedDate : "No date"}
+        <div className="border rounded px-2 py-1 text-xs text-gray-600 bg-gray-50 flex items-center gap-1">
+          <span>{date ? formattedDate : "No date"}</span>
+          {readOnly && <LockIcon className="h-2 w-2 text-gray-400" />}
         </div>
       ) : (
         <input
