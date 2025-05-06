@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const gradeButtons = [
@@ -25,6 +25,13 @@ export const GradeCell: React.FC<GradeCellProps> = ({
   isTeacher,
 }) => {
   const isMobile = useIsMobile();
+  
+  // Ensure grade changes are saved whenever selected grades change
+  useEffect(() => {
+    // Nothing to do here, but this shows we're tracking changes
+    // The actual saving happens in the parent component (GroupTable)
+    console.log(`Grade cell updated for student ${studentId}, date ${dateIdx}, grades: ${selected.join(',')}`);
+  }, [selected, studentId, dateIdx]);
   
   return (
     <td className="text-center px-1 py-1 md:px-2 md:py-2 border-l-2 border-gray-200 relative z-10">

@@ -64,16 +64,19 @@ export const GroupTable = ({
   
   // Save dates to localStorage whenever they change
   useEffect(() => {
+    console.log("Saving dates to localStorage:", dates);
     saveDates(teacherId, title, dates);
   }, [dates, teacherId, title]);
   
   // Save grades to localStorage whenever they change
   useEffect(() => {
+    console.log("Saving grades to localStorage:", grades);
     saveGrades(teacherId, title, grades);
   }, [grades, teacherId, title]);
   
   // Save notes to localStorage whenever they change
   useEffect(() => {
+    console.log("Saving notes to localStorage:", notes);
     saveNotes(teacherId, title, notes);
   }, [notes, teacherId, title]);
 
@@ -98,10 +101,15 @@ export const GroupTable = ({
       } else {
         arr.add(value);
       }
-      return {
+      
+      const newGrades = {
         ...prev,
         [studentId]: { ...st, [dateIdx]: Array.from(arr) },
       };
+      
+      // Ensure immediate saving to localStorage
+      saveGrades(teacherId, title, newGrades);
+      return newGrades;
     });
   };
 
@@ -121,7 +129,10 @@ export const GroupTable = ({
   };
 
   const handleResetGrades = () => {
-    setGrades({});
+    const emptyGrades = {};
+    setGrades(emptyGrades);
+    // Ensure immediate saving to localStorage
+    saveGrades(teacherId, title, emptyGrades);
     toast.success("All grades have been reset");
   };
 

@@ -101,6 +101,39 @@ const Index = () => {
     }
   };
 
+  const handleDeleteTeacher = async (teacherId: string) => {
+    if (!isTeacher()) {
+      toast.error("You need teacher access to delete teachers");
+      return;
+    }
+
+    try {
+      // If connected to Supabase, delete from there first
+      if (user) {
+        const { error } = await supabase
+          .from('teachers')
+          .delete()
+          .eq('id', teacherId);
+          
+        if (error) {
+          throw error;
+        }
+      }
+      
+      // Remove from local state and localStorage
+      setTeachers((prev) => prev.filter((teacher) => teacher.id !== teacherId));
+      
+      // Also delete any related student data
+      const studentsKey = `students_${teacherId}`;
+      localStorage.removeItem(studentsKey);
+      
+      toast.success("Teacher deleted successfully");
+    } catch (error) {
+      console.error('Error deleting teacher:', error);
+      toast.error('Failed to delete teacher');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#8B5CF6]/10 to-white py-8 px-2 md:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -139,7 +172,10 @@ const Index = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <TeachersList teachers={teachers} />
+              <TeachersList 
+                teachers={teachers} 
+                onDeleteTeacher={handleDeleteTeacher}
+              />
             </CardContent>
           </Card>
         </main>
