@@ -17,7 +17,7 @@ interface Teacher {
 const Index = () => {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [recentlyAddedId, setRecentlyAddedId] = useState<string | null>(null);
-  const { isTeacher, user } = useAuth();
+  const { isTeacher, user, ownedTeacherId, setOwnedTeacher, canManageTeacher } = useAuth();
 
   // Load teachers from Supabase if user is logged in, otherwise fallback to localStorage
   useEffect(() => {
@@ -35,6 +35,19 @@ const Index = () => {
           
           if (data && data.length > 0) {
             setTeachers(data as Teacher[]);
+            
+            // If user is a teacher and doesn't have an owned teacher yet
+            // Check if any of these teachers were created by them
+            if (isTeacher() && !ownedTeacherId) {
+              const userTeacher = data.find(
+                (teacher: any) => teacher.user_id === user.id
+              );
+              
+              if (userTeacher) {
+                setOwnedTeacher(userTeacher.id);
+              }
+            }
+            
             return;
           }
         } catch (error) {
@@ -51,7 +64,7 @@ const Index = () => {
     };
     
     fetchTeachers();
-  }, [user]);
+  }, [user, isTeacher, ownedTeacherId, setOwnedTeacher]);
 
   // Save to localStorage as a backup
   useEffect(() => {
@@ -64,6 +77,12 @@ const Index = () => {
       return;
     }
     
+    // Check if the user already has a teacher
+    if (ownedTeacherId) {
+      toast.error("You already have a teacher record. Each user can only manage one teacher.");
+      return;
+    }
+    
     if (!user) {
       // Fallback to localStorage if user is not logged in
       const newTeacher: Teacher = {
@@ -73,6 +92,7 @@ const Index = () => {
       setTeachers((prev) => [...prev, newTeacher]);
       setRecentlyAddedId(newTeacher.id);
       setTimeout(() => setRecentlyAddedId(null), 700);
+      setOwnedTeacher(newTeacher.id);
       toast.success("Teacher added successfully!");
       return;
     }
@@ -93,6 +113,7 @@ const Index = () => {
         setTeachers((prev) => [...prev, newTeacher]);
         setRecentlyAddedId(newTeacher.id);
         setTimeout(() => setRecentlyAddedId(null), 700);
+        setOwnedTeacher(newTeacher.id);
         toast.success("Teacher added successfully!");
       }
     } catch (error) {
@@ -104,6 +125,12 @@ const Index = () => {
   const handleDeleteTeacher = async (teacherId: string) => {
     if (!isTeacher()) {
       toast.error("You need teacher access to delete teachers");
+      return;
+    }
+    
+    // Check if the user can manage this teacher
+    if (!canManageTeacher(teacherId)) {
+      toast.error("You can only delete your own teacher record");
       return;
     }
 
@@ -127,6 +154,9 @@ const Index = () => {
       const studentsKey = `students_${teacherId}`;
       localStorage.removeItem(studentsKey);
       
+      // Remove this as the owned teacher
+      setOwnedTeacher(null);
+      
       toast.success("Teacher deleted successfully");
     } catch (error) {
       console.error('Error deleting teacher:', error);
@@ -149,7 +179,7 @@ const Index = () => {
           </p>
         </header>
         
-        {isTeacher() && (
+        {isTeacher() && !ownedTeacherId && (
           <Card className="w-full animate-scale-in p-6 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-[#8B5CF6]/20 hover:shadow-xl transition-all duration-300">
             <CardHeader className="px-0 pt-0">
               <CardTitle className="text-2xl font-semibold text-[#1A1F2C] flex items-center gap-2">

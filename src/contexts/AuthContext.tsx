@@ -9,9 +9,12 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   role: string;
+  ownedTeacherId: string | null;
   login: (password: string) => Promise<boolean>;
   logout: () => void;
   isTeacher: () => boolean;
+  setOwnedTeacher: (teacherId: string | null) => void;
+  canManageTeacher: (teacherId: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -29,6 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<string>('viewer');
+  const [ownedTeacherId, setOwnedTeacherId] = useState<string | null>(null);
   
   useEffect(() => {
     // Set up auth state listener
@@ -47,6 +51,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Check localStorage for role (for backward compatibility)
           const storedRole = localStorage.getItem('userRole');
           setRole(storedRole === 'teacher' ? 'teacher' : 'viewer');
+          
+          // Reset owned teacher on logout
+          setOwnedTeacherId(null);
+          localStorage.removeItem('ownedTeacherId');
         }
       }
     );
@@ -64,6 +72,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Check localStorage for role (for backward compatibility)
         const storedRole = localStorage.getItem('userRole');
         setRole(storedRole === 'teacher' ? 'teacher' : 'viewer');
+      }
+      
+      // Check for owned teacher in localStorage
+      const storedOwnedTeacher = localStorage.getItem('ownedTeacherId');
+      if (storedOwnedTeacher) {
+        setOwnedTeacherId(storedOwnedTeacher);
       }
       
       setLoading(false);
@@ -148,7 +162,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await supabase.auth.signOut();
       setRole('viewer');
+      setOwnedTeacherId(null);
       localStorage.removeItem('userRole');
+      localStorage.removeItem('ownedTeacherId');
       toast.success("Logged out successfully");
     } catch (error) {
       console.error('Error signing out:', error);
@@ -160,6 +176,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Check both state and localStorage to ensure consistency
     return role === 'teacher' || localStorage.getItem('userRole') === 'teacher';
   };
+  
+  const setOwnedTeacher = (teacherId: string | null) => {
+    setOwnedTeacherId(teacherId);
+    if (teacherId) {
+      localStorage.setItem('ownedTeacherId', teacherId);
+    } else {
+      localStorage.removeItem('ownedTeacherId');
+    }
+  };
+  
+  const canManageTeacher = (teacherId: string): boolean => {
+    // If no owned teacher is set, this is the first one they're creating
+    if (!ownedTeacherId && isTeacher()) {
+      return true;
+    }
+    
+    // If they already have an owned teacher, they can only manage that one
+    return teacherId === ownedTeacherId && isTeacher();
+  };
 
   return (
     <AuthContext.Provider value={{ 
@@ -167,9 +202,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       session, 
       loading, 
       role,
+      ownedTeacherId,
       login,
       logout,
-      isTeacher
+      isTeacher,
+      setOwnedTeacher,
+      canManageTeacher
     }}>
       {children}
     </AuthContext.Provider>

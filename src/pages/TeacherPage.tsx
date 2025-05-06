@@ -3,13 +3,14 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { GroupTable } from "@/components/GroupTable";
+import { GroupTableComponent } from "@/components/GroupTable/GroupTableComponent";
 import { StudentForm } from "@/components/StudentForm";
 import { GradeLegend } from "@/components/GradeLegend";
 import { LoginButton } from "@/components/LoginButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { ChevronLeft } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Student {
   id: number;
@@ -25,10 +26,11 @@ interface Teacher {
 
 const TeacherPage = () => {
   const { teacherId } = useParams<{ teacherId: string }>();
-  const { isTeacher } = useAuth();
+  const { isTeacher, canManageTeacher } = useAuth();
   const [teacher, setTeacher] = useState<Teacher | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
   const [recentlyAddedId, setRecentlyAddedId] = useState<number | null>(null);
+  const [canEdit, setCanEdit] = useState<boolean>(false);
 
   // Load teacher data - this hook always runs
   useEffect(() => {
@@ -43,7 +45,12 @@ const TeacherPage = () => {
     if (savedStudents) {
       setStudents(JSON.parse(savedStudents));
     }
-  }, [teacherId]);
+    
+    // Check if the current user can edit this teacher's data
+    if (teacherId) {
+      setCanEdit(isTeacher() && canManageTeacher(teacherId));
+    }
+  }, [teacherId, isTeacher, canManageTeacher]);
 
   // Save students data - this hook always runs, but operation inside may be conditional
   useEffect(() => {
@@ -52,19 +59,24 @@ const TeacherPage = () => {
     }
   }, [students, teacherId]);
 
-  // Display view-only notification for non-teacher users - always runs regardless of teacher existence
+  // Display view-only notification for non-teacher users or when viewing someone else's teacher
   useEffect(() => {
     if (!isTeacher()) {
       toast.info("You are in view-only mode. Login as teacher to make changes.", {
         duration: 5000,
         id: "view-only-mode" // Prevent duplicate toasts
       });
+    } else if (!canEdit) {
+      toast.info("You are viewing another teacher's data in view-only mode.", {
+        duration: 5000,
+        id: "view-only-mode" // Prevent duplicate toasts
+      });
     }
-  }, [isTeacher]);
+  }, [isTeacher, canEdit]);
 
   const handleAddStudent = (name: string, proficiencyLevel: string, className?: string) => {
-    if (!isTeacher()) {
-      toast.error("You need teacher access to add new students");
+    if (!canEdit) {
+      toast.error("You can only add students to your own teacher record");
       return;
     }
     
@@ -81,8 +93,8 @@ const TeacherPage = () => {
   };
 
   const handleDeleteStudent = (id: number) => {
-    if (!isTeacher()) {
-      toast.error("You need teacher access to delete students");
+    if (!canEdit) {
+      toast.error("You can only delete students from your own teacher record");
       return;
     }
     
@@ -91,8 +103,8 @@ const TeacherPage = () => {
   };
 
   const handleEditStudentName = (id: number, newName: string) => {
-    if (!isTeacher()) {
-      toast.error("You need teacher access to edit student names");
+    if (!canEdit) {
+      toast.error("You can only edit students from your own teacher record");
       return;
     }
     
@@ -148,11 +160,14 @@ const TeacherPage = () => {
             </h1>
             <h2 className="text-2xl font-bold text-[#1A1F2C] mb-4">
               {teacher.name}'s Groups
+              {!canEdit && isTeacher() && (
+                <span className="ml-2 text-sm text-gray-500 font-normal">(View only)</span>
+              )}
             </h2>
           </div>
         </header>
         
-        {isTeacher() && (
+        {canEdit && (
           <aside className="w-full animate-scale-in p-6 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-[#8B5CF6]/20 hover:shadow-xl transition-all duration-300">
             <h2 className="text-2xl font-semibold mb-6 text-[#1A1F2C] flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-[#8B5CF6]" />
@@ -178,14 +193,15 @@ const TeacherPage = () => {
             
             {groups.map(group => (
               <TabsContent key={group.value} value={group.value} className="mt-0">
-                <GroupTable
+                <GroupTableComponent
                   title={group.title}
                   students={group.students}
                   teacherName={teacher.name}
-                  teacherId={teacherId || ''} // Pass teacherId to the GroupTable
+                  teacherId={teacherId || ''} 
                   recentlyAddedId={recentlyAddedId}
                   onDeleteStudent={handleDeleteStudent}
                   onEditStudentName={handleEditStudentName}
+                  canEdit={canEdit}
                 />
               </TabsContent>
             ))}

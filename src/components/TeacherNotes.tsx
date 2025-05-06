@@ -1,26 +1,34 @@
 
 import React from "react";
-import { useAuth } from '@/contexts/AuthContext';
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface TeacherNotesProps {
   notes: string;
-  setNotes: (val: string) => void;
+  setNotes: (value: string) => void;
+  readOnly?: boolean;
 }
 
-export const TeacherNotes: React.FC<TeacherNotesProps> = ({ notes, setNotes }) => {
-  const { isTeacher } = useAuth();
-  
+export const TeacherNotes: React.FC<TeacherNotesProps> = ({ notes, setNotes, readOnly = false }) => {
   return (
-    <div className="mt-3">
-      <label className="block text-[#8B5CF6] font-semibold mb-1">Teacher's Notes</label>
-      <textarea
+    <div className="space-y-2">
+      <Label htmlFor="notes" className="text-sm font-medium">
+        Teacher Notes
+      </Label>
+      <Textarea
+        id="notes"
         value={notes}
-        onChange={e => setNotes(e.target.value)}
-        placeholder="Write your notes or feedback here..."
-        className="w-full min-h-[48px] rounded-md border border-[#8B5CF6]/20 bg-white px-2 py-1 text-base shadow-sm focus:outline-[#8B5CF6] text-sm"
-        disabled={!isTeacher()}
-        readOnly={!isTeacher()}
+        onChange={(e) => setNotes(e.target.value)}
+        placeholder={readOnly ? "No notes available" : "Add your notes here..."}
+        className="min-h-[100px]"
+        readOnly={readOnly}
+        disabled={readOnly}
       />
+      {readOnly && (
+        <p className="text-xs text-gray-500 italic">
+          You are in view-only mode and cannot edit these notes.
+        </p>
+      )}
     </div>
   );
 };

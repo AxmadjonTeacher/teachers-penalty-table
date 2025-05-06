@@ -28,6 +28,7 @@ interface TableContainerProps {
   onNameChange: (val: string) => void;
   onDeleteStudent: (id: number) => void;
   onGradeClick: (studentId: number, dateIdx: number, value: string) => void;
+  canEdit?: boolean;
 }
 
 export const TableContainer: React.FC<TableContainerProps> = ({
@@ -44,7 +45,8 @@ export const TableContainer: React.FC<TableContainerProps> = ({
   onEditCancel,
   onNameChange,
   onDeleteStudent,
-  onGradeClick
+  onGradeClick,
+  canEdit = false
 }) => {
   const isMobile = useIsMobile();
   
@@ -62,6 +64,7 @@ export const TableContainer: React.FC<TableContainerProps> = ({
                   <DateHeader
                     date={dates[idx]}
                     onDateChange={val => handleDateChange(idx, val)}
+                    readOnly={!canEdit}
                   />
                 </TableHead>
               ))}
@@ -85,6 +88,7 @@ export const TableContainer: React.FC<TableContainerProps> = ({
                 onNameChange={onNameChange}
                 onDelete={onDeleteStudent}
                 onGradeClick={onGradeClick}
+                canEdit={canEdit}
               />
             ))}
           </TableBody>

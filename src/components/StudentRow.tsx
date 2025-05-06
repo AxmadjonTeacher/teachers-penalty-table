@@ -29,6 +29,7 @@ interface StudentRowProps {
   onNameChange: (val: string) => void;
   onDelete: (id: number) => void;
   onGradeClick: (studentId: number, dateIdx: number, value: string) => void;
+  canEdit?: boolean;
 }
 
 export const StudentRow: React.FC<StudentRowProps> = ({
@@ -45,6 +46,7 @@ export const StudentRow: React.FC<StudentRowProps> = ({
   onNameChange,
   onDelete,
   onGradeClick,
+  canEdit = false,
 }) => {
   const { isTeacher } = useAuth();
   const isMobile = useIsMobile();
@@ -88,7 +90,7 @@ export const StudentRow: React.FC<StudentRowProps> = ({
                 <span className="whitespace-nowrap font-medium truncate text-xs md:text-sm">
                   {student.name || <span className="text-gray-300 italic">No name</span>}
                 </span>
-                {isTeacher() && (
+                {isTeacher() && canEdit && (
                   <Button
                     onClick={() => onEditStart(student.id, student.name)}
                     variant="ghost"
@@ -107,7 +109,7 @@ export const StudentRow: React.FC<StudentRowProps> = ({
               </span>
             )}
           </div>
-          {isTeacher() && (
+          {isTeacher() && canEdit && (
             <DeleteButton
               onClick={() => onDelete(student.id)}
               title="Delete student"
@@ -122,7 +124,7 @@ export const StudentRow: React.FC<StudentRowProps> = ({
           dateIdx={dateIdx}
           selected={grades[dateIdx] || []}
           onGradeClick={onGradeClick}
-          isTeacher={isTeacher()}
+          isTeacher={canEdit}
         />
       ))}
     </tr>
