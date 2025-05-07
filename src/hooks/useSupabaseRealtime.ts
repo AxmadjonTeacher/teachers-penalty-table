@@ -13,6 +13,18 @@ type RealtimeOptions = {
   setNotes: React.Dispatch<React.SetStateAction<string>>;
 };
 
+// Define proper types for the Supabase payload
+interface RealtimePayload {
+  new: {
+    [key: string]: any;
+    group_name?: string;
+    dates?: string[];
+    notes?: string;
+  };
+  old: object;
+  eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+}
+
 export const useSupabaseRealtime = ({
   teacherId,
   groupTitle,
@@ -41,10 +53,12 @@ export const useSupabaseRealtime = ({
         }, 
         payload => {
           console.log('Real-time dates update received:', payload);
-          if (payload.new && payload.new.group_name === groupTitle) {
-            const newDates = payload.new.dates.map((dateStr: string | null) => 
+          const payloadData = payload as unknown as RealtimePayload;
+          
+          if (payloadData.new && payloadData.new.group_name === groupTitle) {
+            const newDates = payloadData.new.dates?.map((dateStr: string | null) => 
               dateStr ? new Date(dateStr) : null
-            );
+            ) || [];
             setDates(newDates);
             saveDates(teacherId, groupTitle, newDates);
           }
@@ -81,9 +95,13 @@ export const useSupabaseRealtime = ({
         }, 
         payload => {
           console.log('Real-time notes update received:', payload);
-          if (payload.new && payload.new.group_name === groupTitle) {
-            setNotes(payload.new.notes);
-            saveNotes(teacherId, groupTitle, payload.new.notes);
+          const payloadData = payload as unknown as RealtimePayload;
+          
+          if (payloadData.new && payloadData.new.group_name === groupTitle) {
+            if (typeof payloadData.new.notes === 'string') {
+              setNotes(payloadData.new.notes);
+              saveNotes(teacherId, groupTitle, payloadData.new.notes);
+            }
           }
         }
       )
