@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { TeachersList } from "@/components/TeachersList";
 import { TeacherForm } from "@/components/TeacherForm";
@@ -131,12 +130,6 @@ const Index = () => {
       return;
     }
     
-    // Check if the user can manage this teacher
-    if (!canManageTeacher(teacherId)) {
-      toast.error("You can only delete your own teacher record");
-      return;
-    }
-
     try {
       // If connected to Supabase, delete from there first
       if (user) {
@@ -157,8 +150,10 @@ const Index = () => {
       const studentsKey = `students_${teacherId}`;
       localStorage.removeItem(studentsKey);
       
-      // Remove this as the owned teacher
-      setOwnedTeacher(null);
+      // If this was the owned teacher, reset it
+      if (teacherId === ownedTeacherId) {
+        setOwnedTeacher(null);
+      }
       
       toast.success("Teacher deleted successfully");
     } catch (error) {

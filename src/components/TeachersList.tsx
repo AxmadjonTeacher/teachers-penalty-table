@@ -53,7 +53,7 @@ export const TeachersList: React.FC<TeachersListProps> = ({ teachers, onDeleteTe
                     </span>
                   )}
                 </CardTitle>
-                {isTeacher() && onDeleteTeacher && canManageTeacher(teacher.id) && (
+                {isTeacher() && onDeleteTeacher && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button 
