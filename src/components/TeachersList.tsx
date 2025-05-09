@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { DeleteButton } from "@/components/ui/DeleteButton";
 
 interface Teacher {
   id: string;
