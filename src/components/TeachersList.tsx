@@ -28,7 +28,7 @@ interface TeachersListProps {
 }
 
 export const TeachersList: React.FC<TeachersListProps> = ({ teachers, onDeleteTeacher }) => {
-  const { isTeacher, canManageTeacher } = useAuth();
+  const { isTeacher } = useAuth();
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -47,11 +47,6 @@ export const TeachersList: React.FC<TeachersListProps> = ({ teachers, onDeleteTe
                 <CardTitle className="text-xl flex items-center gap-2">
                   <User className="h-5 w-5 text-[#8B5CF6]" />
                   {teacher.name || "Unnamed Teacher"}
-                  {canManageTeacher(teacher.id) && (
-                    <span className="bg-[#8B5CF6]/10 text-[#8B5CF6] text-xs px-2 py-0.5 rounded-full">
-                      Yours
-                    </span>
-                  )}
                 </CardTitle>
                 {isTeacher() && onDeleteTeacher && (
                   <AlertDialog>
