@@ -16,7 +16,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { DeleteButton } from "@/components/ui/DeleteButton";
 
 interface Teacher {
   id: string;
@@ -29,13 +28,13 @@ interface TeachersListProps {
 }
 
 export const TeachersList: React.FC<TeachersListProps> = ({ teachers, onDeleteTeacher }) => {
-  const { isTeacher, user, canManageTeacher } = useAuth();
+  const { isTeacher, canManageTeacher } = useAuth();
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {teachers.length === 0 ? (
         <p className="text-gray-400 italic col-span-full text-center py-4">
-          {user ? "No teachers available yet." : "Please log in to view teachers."}
+          No teachers available yet.
         </p>
       ) : (
         teachers.map((teacher) => (
