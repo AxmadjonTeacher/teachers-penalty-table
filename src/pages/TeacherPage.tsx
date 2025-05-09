@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { GroupTableComponent } from "@/components/GroupTable/GroupTableComponent";
@@ -26,91 +26,253 @@ interface Teacher {
 
 const TeacherPage = () => {
   const { teacherId } = useParams<{ teacherId: string }>();
-  const { isTeacher, canManageTeacher } = useAuth();
+  const { isTeacher, user, canManageTeacher } = useAuth();
+  const navigate = useNavigate();
   const [teacher, setTeacher] = useState<Teacher | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
   const [recentlyAddedId, setRecentlyAddedId] = useState<number | null>(null);
   const [canEdit, setCanEdit] = useState<boolean>(false);
 
-  // Load teacher data - this hook always runs
+  // Load teacher data
   useEffect(() => {
-    const savedTeachers = localStorage.getItem("teachers");
-    if (savedTeachers) {
-      const teachersList = JSON.parse(savedTeachers);
-      const currentTeacher = teachersList.find((t: Teacher) => t.id === teacherId);
-      setTeacher(currentTeacher || null);
-    }
+    const fetchTeacher = async () => {
+      if (!teacherId) return;
+      
+      try {
+        // Try to fetch from Supabase first
+        if (user) {
+          const { data, error } = await supabase
+            .from('teachers')
+            .select('id, name, user_id')
+            .eq('id', teacherId)
+            .single();
+            
+          if (error) {
+            console.error('Error fetching teacher:', error);
+          } else if (data) {
+            setTeacher(data);
+            return;
+          }
+        }
+        
+        // Fallback to localStorage
+        const savedTeachers = localStorage.getItem("teachers");
+        if (savedTeachers) {
+          const teachersList = JSON.parse(savedTeachers);
+          const currentTeacher = teachersList.find((t: Teacher) => t.id === teacherId);
+          setTeacher(currentTeacher || null);
+        }
+      } catch (err) {
+        console.error('Failed to fetch teacher:', err);
+      }
+    };
     
-    const savedStudents = localStorage.getItem(`students_${teacherId}`);
-    if (savedStudents) {
-      setStudents(JSON.parse(savedStudents));
-    }
+    fetchTeacher();
+  }, [teacherId, user]);
+
+  // Load students
+  useEffect(() => {
+    const fetchStudents = async () => {
+      if (!teacherId) return;
+      
+      try {
+        // Try to fetch from Supabase first
+        if (user) {
+          const { data, error } = await supabase
+            .from('students')
+            .select('*')
+            .eq('teacher_id', teacherId);
+            
+          if (error) {
+            console.error('Error fetching students:', error);
+          } else if (data && data.length > 0) {
+            // Convert Supabase format to our format
+            const formattedStudents = data.map(student => ({
+              id: parseInt(student.id),
+              name: student.name,
+              proficiencyLevel: student.proficiency_level,
+              className: student.class_name
+            }));
+            
+            setStudents(formattedStudents);
+            return;
+          }
+        }
+        
+        // Fallback to localStorage
+        const savedStudents = localStorage.getItem(`students_${teacherId}`);
+        if (savedStudents) {
+          setStudents(JSON.parse(savedStudents));
+        }
+      } catch (err) {
+        console.error('Failed to fetch students:', err);
+      }
+    };
     
-    // Check if the current user can edit this teacher's data
+    fetchStudents();
+    
+    // Set up real-time subscription for students
+    if (user && teacherId) {
+      const studentsChannel = supabase
+        .channel('students-changes')
+        .on('postgres_changes', 
+          { 
+            event: '*', 
+            schema: 'public', 
+            table: 'students',
+            filter: `teacher_id=eq.${teacherId}` 
+          }, 
+          () => {
+            console.log('Students changed, refreshing data');
+            fetchStudents();
+          }
+        )
+        .subscribe();
+        
+      return () => {
+        supabase.removeChannel(studentsChannel);
+      };
+    }
+  }, [teacherId, user]);
+
+  // Save students data
+  useEffect(() => {
+    if (students.length > 0 && teacherId) {
+      localStorage.setItem(`students_${teacherId}`, JSON.stringify(students));
+    }
+  }, [students, teacherId]);
+
+  // Check if user can edit
+  useEffect(() => {
     if (teacherId) {
       setCanEdit(isTeacher() && canManageTeacher(teacherId));
     }
   }, [teacherId, isTeacher, canManageTeacher]);
 
-  // Save students data - this hook always runs, but operation inside may be conditional
+  // Display view-only notification
   useEffect(() => {
-    if (students.length > 0) {
-      localStorage.setItem(`students_${teacherId}`, JSON.stringify(students));
-    }
-  }, [students, teacherId]);
-
-  // Display view-only notification for non-teacher users or when viewing someone else's teacher
-  useEffect(() => {
-    if (!isTeacher()) {
-      toast.info("You are in view-only mode. Login as teacher to make changes.", {
+    if (!user) {
+      toast.info("You are not logged in. Please log in for the best experience.", {
         duration: 5000,
-        id: "view-only-mode" // Prevent duplicate toasts
+        id: "login-prompt"
+      });
+    } else if (!isTeacher()) {
+      toast.info("You are in view-only mode. Request teacher access to make changes.", {
+        duration: 5000,
+        id: "view-only-mode"
       });
     } else if (!canEdit) {
       toast.info("You are viewing another teacher's data in view-only mode.", {
         duration: 5000,
-        id: "view-only-mode" // Prevent duplicate toasts
+        id: "view-only-mode"
       });
     }
-  }, [isTeacher, canEdit]);
+  }, [user, isTeacher, canEdit]);
 
-  const handleAddStudent = (name: string, proficiencyLevel: string, className?: string) => {
+  const handleAddStudent = async (name: string, proficiencyLevel: string, className?: string) => {
     if (!canEdit) {
       toast.error("You can only add students to your own teacher record");
       return;
     }
     
-    const newStudent: Student = {
-      id: Date.now(),
-      name,
-      proficiencyLevel,
-      className: className || "",
-    };
-    setStudents((prev) => [...prev, newStudent]);
-    setRecentlyAddedId(newStudent.id);
-    setTimeout(() => setRecentlyAddedId(null), 700);
-    toast.success("Student added successfully!");
+    try {
+      const newStudentId = Date.now();
+      const newStudent: Student = {
+        id: newStudentId,
+        name,
+        proficiencyLevel,
+        className: className || "",
+      };
+      
+      // Add to Supabase if user is logged in
+      if (user && teacherId) {
+        const { error } = await supabase
+          .from('students')
+          .insert({
+            id: newStudentId.toString(),
+            name,
+            proficiency_level: proficiencyLevel,
+            class_name: className || "",
+            teacher_id: teacherId
+          });
+          
+        if (error) {
+          console.error('Error adding student to Supabase:', error);
+          toast.error("Failed to add student to database");
+          return;
+        }
+      }
+      
+      // Update local state
+      setStudents((prev) => [...prev, newStudent]);
+      setRecentlyAddedId(newStudent.id);
+      setTimeout(() => setRecentlyAddedId(null), 700);
+      toast.success("Student added successfully!");
+    } catch (err) {
+      console.error('Failed to add student:', err);
+      toast.error("Failed to add student");
+    }
   };
 
-  const handleDeleteStudent = (id: number) => {
+  const handleDeleteStudent = async (id: number) => {
     if (!canEdit) {
       toast.error("You can only delete students from your own teacher record");
       return;
     }
     
-    setStudents((prev) => prev.filter((stu) => stu.id !== id));
-    toast.success("Student removed.");
+    try {
+      // Delete from Supabase if user is logged in
+      if (user) {
+        const { error } = await supabase
+          .from('students')
+          .delete()
+          .eq('id', id.toString());
+          
+        if (error) {
+          console.error('Error deleting student from Supabase:', error);
+          toast.error("Failed to delete student from database");
+          return;
+        }
+      }
+      
+      // Update local state
+      setStudents((prev) => prev.filter((stu) => stu.id !== id));
+      toast.success("Student removed.");
+    } catch (err) {
+      console.error('Failed to delete student:', err);
+      toast.error("Failed to delete student");
+    }
   };
 
-  const handleEditStudentName = (id: number, newName: string) => {
+  const handleEditStudentName = async (id: number, newName: string) => {
     if (!canEdit) {
       toast.error("You can only edit students from your own teacher record");
       return;
     }
     
-    setStudents((prev) =>
-      prev.map((stu) => (stu.id === id ? { ...stu, name: newName } : stu))
-    );
+    try {
+      // Update in Supabase if user is logged in
+      if (user) {
+        const { error } = await supabase
+          .from('students')
+          .update({ name: newName })
+          .eq('id', id.toString());
+          
+        if (error) {
+          console.error('Error updating student name in Supabase:', error);
+          toast.error("Failed to update student name in database");
+          return;
+        }
+      }
+      
+      // Update local state
+      setStudents((prev) =>
+        prev.map((stu) => (stu.id === id ? { ...stu, name: newName } : stu))
+      );
+    } catch (err) {
+      console.error('Failed to update student name:', err);
+      toast.error("Failed to update student name");
+    }
   };
 
   // If teacher not found, render error message

@@ -19,12 +19,12 @@ const Index = () => {
   const [recentlyAddedId, setRecentlyAddedId] = useState<string | null>(null);
   const { isTeacher, user, ownedTeacherId, setOwnedTeacher, canManageTeacher } = useAuth();
 
-  // Load teachers from Supabase if user is logged in, otherwise fallback to localStorage
+  // Load teachers from Supabase
   useEffect(() => {
     const fetchTeachers = async () => {
-      if (user) {
-        // Try to fetch from Supabase
-        try {
+      try {
+        if (user) {
+          // Try to fetch from Supabase
           const { data, error } = await supabase
             .from('teachers')
             .select('id, name, user_id');
@@ -33,7 +33,7 @@ const Index = () => {
             throw error;
           }
           
-          if (data && data.length > 0) {
+          if (data) {
             setTeachers(data as Teacher[]);
             
             // If user is a teacher and doesn't have an owned teacher yet
@@ -47,16 +47,19 @@ const Index = () => {
                 setOwnedTeacher(userTeacher.id);
               }
             }
-            
             return;
           }
-        } catch (error) {
-          console.error('Error fetching teachers from Supabase:', error);
-          toast.error('Failed to fetch teachers');
+        } else {
+          // Clear teachers if no user is logged in
+          setTeachers([]);
+          return;
         }
+      } catch (error) {
+        console.error('Error fetching teachers from Supabase:', error);
+        toast.error('Failed to fetch teachers');
       }
       
-      // Fallback to localStorage if Supabase fetch fails or user is not logged in
+      // Fallback to localStorage if Supabase fetch fails
       const savedTeachers = localStorage.getItem("teachers");
       if (savedTeachers) {
         setTeachers(JSON.parse(savedTeachers));
@@ -179,7 +182,7 @@ const Index = () => {
           </p>
         </header>
         
-        {isTeacher() && !ownedTeacherId && (
+        {user && isTeacher() && !ownedTeacherId && (
           <Card className="w-full animate-scale-in p-6 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-[#8B5CF6]/20 hover:shadow-xl transition-all duration-300">
             <CardHeader className="px-0 pt-0">
               <CardTitle className="text-2xl font-semibold text-[#1A1F2C] flex items-center gap-2">

@@ -12,13 +12,23 @@ interface TeacherFormProps {
 
 export const TeacherForm: React.FC<TeacherFormProps> = ({ onAddTeacher }) => {
   const [teacherName, setTeacherName] = useState("");
-  const { isTeacher } = useAuth();
+  const { isTeacher, user, ownedTeacherId } = useAuth();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!user) {
+      toast.error("You need to log in to add a teacher");
+      return;
+    }
+    
     if (!isTeacher()) {
       toast.error("You need teacher access to add new teachers");
+      return;
+    }
+    
+    if (ownedTeacherId) {
+      toast.error("You already have a teacher record");
       return;
     }
     
@@ -40,13 +50,13 @@ export const TeacherForm: React.FC<TeacherFormProps> = ({ onAddTeacher }) => {
           onChange={(e) => setTeacherName(e.target.value)}
           placeholder="Enter teacher's name"
           className="w-full"
-          disabled={!isTeacher()}
+          disabled={!user || !isTeacher() || !!ownedTeacherId}
         />
       </div>
       <Button 
         type="submit" 
         className="bg-[#8B5CF6] hover:bg-[#7C3AED]"
-        disabled={!isTeacher()}
+        disabled={!user || !isTeacher() || !!ownedTeacherId}
       >
         <Plus className="mr-1 h-4 w-4" /> Add Teacher
       </Button>

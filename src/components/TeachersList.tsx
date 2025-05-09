@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Trash2 } from "lucide-react";
@@ -28,13 +28,13 @@ interface TeachersListProps {
 }
 
 export const TeachersList: React.FC<TeachersListProps> = ({ teachers, onDeleteTeacher }) => {
-  const { isTeacher, canManageTeacher } = useAuth();
+  const { isTeacher, user, canManageTeacher } = useAuth();
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {teachers.length === 0 ? (
         <p className="text-gray-400 italic col-span-full text-center py-4">
-          No teachers available. Add a teacher to get started.
+          {user ? "No teachers available yet." : "Please log in to view teachers."}
         </p>
       ) : (
         teachers.map((teacher) => (

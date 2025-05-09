@@ -21,7 +21,9 @@ interface RealtimePayload {
     dates?: string[];
     notes?: string;
   };
-  old: object;
+  old: {
+    [key: string]: any;
+  };
   eventType: 'INSERT' | 'UPDATE' | 'DELETE';
 }
 
