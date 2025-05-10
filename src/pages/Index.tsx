@@ -8,7 +8,7 @@ import { useTeachers } from "@/hooks/useTeachers";
 
 const Index = () => {
   const { isTeacher, user, ownedTeacherId } = useAuth();
-  const { teachers, setTeachers, handleAddTeacher } = useTeachers();
+  const { teachers, setTeachers, handleAddTeacher, handleDeleteTeacher } = useTeachers();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#8B5CF6]/10 to-white py-8 px-2 md:px-8">
@@ -30,7 +30,10 @@ const Index = () => {
         )}
         
         <main className="w-full space-y-8">
-          <TeachersSection teachers={teachers} setTeachers={setTeachers} />
+          <TeachersSection 
+            teachers={teachers} 
+            setTeachers={setTeachers} 
+          />
         </main>
       </div>
     </div>
