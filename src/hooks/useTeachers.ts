@@ -29,6 +29,7 @@ export const useTeachers = () => {
           }
           
           if (data) {
+            console.log("Teachers fetched from Supabase:", data);
             setTeachers(data as Teacher[]);
             
             // If user is a teacher and doesn't have an owned teacher yet
@@ -57,6 +58,7 @@ export const useTeachers = () => {
       // Fallback to localStorage if Supabase fetch fails
       const savedTeachers = localStorage.getItem("teachers");
       if (savedTeachers) {
+        console.log("Teachers fetched from localStorage:", JSON.parse(savedTeachers));
         setTeachers(JSON.parse(savedTeachers));
       }
     };
@@ -67,17 +69,12 @@ export const useTeachers = () => {
   // Save to localStorage as a backup
   useEffect(() => {
     localStorage.setItem("teachers", JSON.stringify(teachers));
+    console.log("Teachers saved to localStorage:", teachers);
   }, [teachers]);
 
   const handleAddTeacher = async (name: string) => {
     if (!isTeacher()) {
       toast.error("You need teacher access to add new teachers");
-      return;
-    }
-    
-    // Check if the user already has a teacher
-    if (ownedTeacherId) {
-      toast.error("You already have a teacher record. Each user can only manage one teacher.");
       return;
     }
     

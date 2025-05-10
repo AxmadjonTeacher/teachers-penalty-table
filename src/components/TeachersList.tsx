@@ -48,7 +48,7 @@ export const TeachersList: React.FC<TeachersListProps> = ({ teachers, onDeleteTe
                   <User className="h-5 w-5 text-[#8B5CF6]" />
                   {teacher.name || "Unnamed Teacher"}
                 </CardTitle>
-                {isTeacher() && onDeleteTeacher && (
+                {onDeleteTeacher && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button 

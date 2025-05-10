@@ -21,15 +21,12 @@ export const TeachersSection: React.FC<TeachersSectionProps> = ({
   teachers, 
   setTeachers 
 }) => {
-  const { isTeacher, user, ownedTeacherId, setOwnedTeacher } = useAuth();
+  const { isTeacher, user, setOwnedTeacher } = useAuth();
 
   const handleDeleteTeacher = async (teacherId: string) => {
-    if (!isTeacher()) {
-      toast.error("You need teacher access to delete teachers");
-      return;
-    }
-    
     try {
+      console.log("Deleting teacher with ID:", teacherId);
+      
       // If connected to Supabase, delete from there first
       if (user) {
         const { error } = await supabase
@@ -42,17 +39,19 @@ export const TeachersSection: React.FC<TeachersSectionProps> = ({
         }
       }
       
-      // Remove from local state and localStorage
-      setTeachers((prev) => prev.filter((teacher) => teacher.id !== teacherId));
+      // Remove from local state
+      setTeachers(prev => prev.filter(teacher => teacher.id !== teacherId));
+      
+      // Update localStorage
+      const updatedTeachers = teachers.filter(teacher => teacher.id !== teacherId);
+      localStorage.setItem("teachers", JSON.stringify(updatedTeachers));
       
       // Also delete any related student data
       const studentsKey = `students_${teacherId}`;
       localStorage.removeItem(studentsKey);
       
-      // If this was the owned teacher, reset it
-      if (teacherId === ownedTeacherId) {
-        setOwnedTeacher(null);
-      }
+      // Reset owned teacher if needed
+      setOwnedTeacher(null);
       
       toast.success("Teacher deleted successfully");
     } catch (error) {
