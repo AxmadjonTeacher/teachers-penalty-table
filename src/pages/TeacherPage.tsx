@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button";
 import { GroupTableComponent } from "@/components/GroupTable/GroupTableComponent";
 import { StudentForm } from "@/components/StudentForm";
 import { GradeLegend } from "@/components/GradeLegend";
-import { LoginButton } from "@/components/LoginButton";
-import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { ChevronLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,12 +24,10 @@ interface Teacher {
 
 const TeacherPage = () => {
   const { teacherId } = useParams<{ teacherId: string }>();
-  const { isTeacher, user, canManageTeacher } = useAuth();
   const navigate = useNavigate();
   const [teacher, setTeacher] = useState<Teacher | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
   const [recentlyAddedId, setRecentlyAddedId] = useState<number | null>(null);
-  const [canEdit, setCanEdit] = useState<boolean>(false);
 
   // Load teacher data
   useEffect(() => {
@@ -40,19 +36,17 @@ const TeacherPage = () => {
       
       try {
         // Try to fetch from Supabase first
-        if (user) {
-          const { data, error } = await supabase
-            .from('teachers')
-            .select('id, name, user_id')
-            .eq('id', teacherId)
-            .single();
-            
-          if (error) {
-            console.error('Error fetching teacher:', error);
-          } else if (data) {
-            setTeacher(data);
-            return;
-          }
+        const { data, error } = await supabase
+          .from('teachers')
+          .select('id, name, user_id')
+          .eq('id', teacherId)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching teacher:', error);
+        } else if (data) {
+          setTeacher(data);
+          return;
         }
         
         // Fallback to localStorage
@@ -68,7 +62,7 @@ const TeacherPage = () => {
     };
     
     fetchTeacher();
-  }, [teacherId, user]);
+  }, [teacherId]);
 
   // Load students
   useEffect(() => {
@@ -77,26 +71,24 @@ const TeacherPage = () => {
       
       try {
         // Try to fetch from Supabase first
-        if (user) {
-          const { data, error } = await supabase
-            .from('students')
-            .select('*')
-            .eq('teacher_id', teacherId);
-            
-          if (error) {
-            console.error('Error fetching students:', error);
-          } else if (data && data.length > 0) {
-            // Convert Supabase format to our format
-            const formattedStudents = data.map(student => ({
-              id: parseInt(student.id),
-              name: student.name,
-              proficiencyLevel: student.proficiency_level,
-              className: student.class_name
-            }));
-            
-            setStudents(formattedStudents);
-            return;
-          }
+        const { data, error } = await supabase
+          .from('students')
+          .select('*')
+          .eq('teacher_id', teacherId);
+          
+        if (error) {
+          console.error('Error fetching students:', error);
+        } else if (data && data.length > 0) {
+          // Convert Supabase format to our format
+          const formattedStudents = data.map(student => ({
+            id: parseInt(student.id),
+            name: student.name,
+            proficiencyLevel: student.proficiency_level,
+            className: student.class_name
+          }));
+          
+          setStudents(formattedStudents);
+          return;
         }
         
         // Fallback to localStorage
@@ -112,7 +104,7 @@ const TeacherPage = () => {
     fetchStudents();
     
     // Set up real-time subscription for students
-    if (user && teacherId) {
+    if (teacherId) {
       const studentsChannel = supabase
         .channel('students-changes')
         .on('postgres_changes', 
@@ -133,7 +125,7 @@ const TeacherPage = () => {
         supabase.removeChannel(studentsChannel);
       };
     }
-  }, [teacherId, user]);
+  }, [teacherId]);
 
   // Save students data
   useEffect(() => {
@@ -142,38 +134,8 @@ const TeacherPage = () => {
     }
   }, [students, teacherId]);
 
-  // Check if user can edit
-  useEffect(() => {
-    if (teacherId) {
-      setCanEdit(isTeacher() && canManageTeacher(teacherId));
-    }
-  }, [teacherId, isTeacher, canManageTeacher]);
-
-  // Display view-only notification
-  useEffect(() => {
-    if (!user) {
-      toast.info("You are not logged in. Please log in for the best experience.", {
-        duration: 5000,
-        id: "login-prompt"
-      });
-    } else if (!isTeacher()) {
-      toast.info("You are in view-only mode. Request teacher access to make changes.", {
-        duration: 5000,
-        id: "view-only-mode"
-      });
-    } else if (!canEdit) {
-      toast.info("You are viewing another teacher's data in view-only mode.", {
-        duration: 5000,
-        id: "view-only-mode"
-      });
-    }
-  }, [user, isTeacher, canEdit]);
 
   const handleAddStudent = async (name: string, proficiencyLevel: string, className?: string) => {
-    if (!canEdit) {
-      toast.error("You can only add students to your own teacher record");
-      return;
-    }
     
     try {
       const newStudentId = Date.now();
@@ -184,8 +146,8 @@ const TeacherPage = () => {
         className: className || "",
       };
       
-      // Add to Supabase if user is logged in
-      if (user && teacherId) {
+      // Add to Supabase
+      if (teacherId) {
         const { error } = await supabase
           .from('students')
           .insert({
@@ -215,24 +177,18 @@ const TeacherPage = () => {
   };
 
   const handleDeleteStudent = async (id: number) => {
-    if (!canEdit) {
-      toast.error("You can only delete students from your own teacher record");
-      return;
-    }
     
     try {
-      // Delete from Supabase if user is logged in
-      if (user) {
-        const { error } = await supabase
-          .from('students')
-          .delete()
-          .eq('id', id.toString());
-          
-        if (error) {
-          console.error('Error deleting student from Supabase:', error);
-          toast.error("Failed to delete student from database");
-          return;
-        }
+      // Delete from Supabase
+      const { error } = await supabase
+        .from('students')
+        .delete()
+        .eq('id', id.toString());
+        
+      if (error) {
+        console.error('Error deleting student from Supabase:', error);
+        toast.error("Failed to delete student from database");
+        return;
       }
       
       // Update local state
@@ -245,24 +201,18 @@ const TeacherPage = () => {
   };
 
   const handleEditStudentName = async (id: number, newName: string) => {
-    if (!canEdit) {
-      toast.error("You can only edit students from your own teacher record");
-      return;
-    }
     
     try {
-      // Update in Supabase if user is logged in
-      if (user) {
-        const { error } = await supabase
-          .from('students')
-          .update({ name: newName })
-          .eq('id', id.toString());
-          
-        if (error) {
-          console.error('Error updating student name in Supabase:', error);
-          toast.error("Failed to update student name in database");
-          return;
-        }
+      // Update in Supabase
+      const { error } = await supabase
+        .from('students')
+        .update({ name: newName })
+        .eq('id', id.toString());
+        
+      if (error) {
+        console.error('Error updating student name in Supabase:', error);
+        toast.error("Failed to update student name in database");
+        return;
       }
       
       // Update local state
@@ -314,7 +264,6 @@ const TeacherPage = () => {
                   <ChevronLeft className="h-4 w-4" /> Back to Teachers
                 </Button>
               </Link>
-              <LoginButton />
             </div>
             
             <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] via-[#7C3AED] to-[#6D28D9] tracking-tight drop-shadow">
@@ -322,22 +271,17 @@ const TeacherPage = () => {
             </h1>
             <h2 className="text-2xl font-bold text-[#1A1F2C] mb-4">
               {teacher.name}'s Groups
-              {!canEdit && isTeacher() && (
-                <span className="ml-2 text-sm text-gray-500 font-normal">(View only)</span>
-              )}
             </h2>
           </div>
         </header>
         
-        {canEdit && (
-          <aside className="w-full animate-scale-in p-6 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-[#8B5CF6]/20 hover:shadow-xl transition-all duration-300">
-            <h2 className="text-2xl font-semibold mb-6 text-[#1A1F2C] flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-[#8B5CF6]" />
-              Add New Student
-            </h2>
-            <StudentForm onAddStudent={handleAddStudent} />
-          </aside>
-        )}
+        <aside className="w-full animate-scale-in p-6 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-[#8B5CF6]/20 hover:shadow-xl transition-all duration-300">
+          <h2 className="text-2xl font-semibold mb-6 text-[#1A1F2C] flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-[#8B5CF6]" />
+            Add New Student
+          </h2>
+          <StudentForm onAddStudent={handleAddStudent} />
+        </aside>
         
         <main className="w-full space-y-8">
           <Tabs defaultValue="grades-5-6" className="w-full">
@@ -363,7 +307,7 @@ const TeacherPage = () => {
                   recentlyAddedId={recentlyAddedId}
                   onDeleteStudent={handleDeleteStudent}
                   onEditStudentName={handleEditStudentName}
-                  canEdit={canEdit}
+                  canEdit={true}
                 />
               </TabsContent>
             ))}

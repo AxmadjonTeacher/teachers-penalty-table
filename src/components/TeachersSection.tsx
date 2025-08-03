@@ -3,7 +3,7 @@ import React from "react";
 import { TeachersList } from "@/components/TeachersList";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+
 import { useTeachers } from "@/hooks/useTeachers";
 
 interface Teacher {
@@ -20,7 +20,6 @@ export const TeachersSection: React.FC<TeachersSectionProps> = ({
   teachers, 
   setTeachers 
 }) => {
-  const { useTeachers: useTeachersHook } = useAuth();
   const { handleDeleteTeacher } = useTeachers();
 
   return (

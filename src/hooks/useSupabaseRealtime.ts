@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { GradesState, saveGrades, saveDates, saveNotes } from '@/utils/gradeStorage';
-import { useAuth } from '@/contexts/AuthContext';
+
 
 type RealtimeOptions = {
   teacherId: string;
@@ -35,11 +35,9 @@ export const useSupabaseRealtime = ({
   setGrades,
   setNotes
 }: RealtimeOptions) => {
-  const { user } = useAuth();
 
   // Set up real-time subscription for changes
   useEffect(() => {
-    if (!user) return;
     
     console.log('Setting up real-time subscription for data changes');
     
@@ -179,7 +177,7 @@ export const useSupabaseRealtime = ({
         console.error('Failed to fetch grades from real-time update:', err);
       }
     }
-  }, [user, teacherId, groupTitle, dates, setDates, setGrades, setNotes]);
+  }, [teacherId, groupTitle, dates, setDates, setGrades, setNotes]);
 
   return null;
 };

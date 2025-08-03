@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { GradesState } from '@/utils/gradeStorage';
-import { useAuth } from '@/contexts/AuthContext';
+
 
 type SyncOptions = {
   teacherId: string;
@@ -26,11 +26,9 @@ export const useSupabaseSync = ({
   setGrades,
   setNotes
 }: SyncOptions) => {
-  const { user } = useAuth();
 
   // Save dates to Supabase
   useEffect(() => {
-    if (!user) return;
     
     console.log('Syncing dates to Supabase...');
     const formatDatesForSupabase = dates.map(date => date ? date.toISOString() : null);
@@ -60,11 +58,10 @@ export const useSupabaseSync = ({
     };
     
     syncDates();
-  }, [dates, teacherId, groupTitle, user]);
+  }, [dates, teacherId, groupTitle]);
 
   // Save grades to Supabase
   useEffect(() => {
-    if (!user) return;
     
     console.log('Syncing grades to Supabase...');
     
@@ -107,11 +104,10 @@ export const useSupabaseSync = ({
     };
     
     syncGrades();
-  }, [grades, teacherId, groupTitle, user, dates]);
+  }, [grades, teacherId, groupTitle, dates]);
 
   // Save notes to Supabase
   useEffect(() => {
-    if (!user) return;
     
     console.log('Syncing notes to Supabase...');
     
@@ -140,7 +136,7 @@ export const useSupabaseSync = ({
     };
     
     syncNotes();
-  }, [notes, teacherId, groupTitle, user]);
+  }, [notes, teacherId, groupTitle]);
 
   return null;
 };

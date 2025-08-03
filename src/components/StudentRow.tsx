@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DeleteButton } from "@/components/ui/DeleteButton";
 import { GradeCell } from "./GradeCell";
 import { Check, X, Edit } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Student {
@@ -48,7 +48,6 @@ export const StudentRow: React.FC<StudentRowProps> = ({
   onGradeClick,
   canEdit = false,
 }) => {
-  const { isTeacher } = useAuth();
   const isMobile = useIsMobile();
   
   return (
@@ -90,7 +89,7 @@ export const StudentRow: React.FC<StudentRowProps> = ({
                 <span className="whitespace-nowrap font-medium truncate text-xs md:text-sm">
                   {student.name || <span className="text-gray-300 italic">No name</span>}
                 </span>
-                {isTeacher() && canEdit && (
+                {canEdit && (
                   <Button
                     onClick={() => onEditStart(student.id, student.name)}
                     variant="ghost"
@@ -109,7 +108,7 @@ export const StudentRow: React.FC<StudentRowProps> = ({
               </span>
             )}
           </div>
-          {isTeacher() && canEdit && (
+          {canEdit && (
             <DeleteButton
               onClick={() => onDelete(student.id)}
               title="Delete student"

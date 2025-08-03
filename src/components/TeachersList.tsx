@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
+
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -28,7 +28,6 @@ interface TeachersListProps {
 }
 
 export const TeachersList: React.FC<TeachersListProps> = ({ teachers, onDeleteTeacher }) => {
-  const { isTeacher } = useAuth();
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

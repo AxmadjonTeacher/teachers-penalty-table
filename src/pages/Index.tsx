@@ -1,22 +1,16 @@
 
 import React from "react";
-import { LoginButton } from "@/components/LoginButton";
-import { useAuth } from "@/contexts/AuthContext";
 import { TeachersSection } from "@/components/TeachersSection";
 import { AddTeacherSection } from "@/components/AddTeacherSection";
 import { useTeachers } from "@/hooks/useTeachers";
 
 const Index = () => {
-  const { isTeacher, user, ownedTeacherId } = useAuth();
   const { teachers, setTeachers, handleAddTeacher, handleDeleteTeacher } = useTeachers();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#8B5CF6]/10 to-white py-8 px-2 md:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
         <header className="flex flex-col items-center gap-3 animate-fade-in">
-          <div className="self-end">
-            <LoginButton />
-          </div>
           <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#8B5CF6] via-[#7C3AED] to-[#6D28D9] tracking-tight drop-shadow">
             Monitoring App
           </h1>
@@ -25,9 +19,7 @@ const Index = () => {
           </p>
         </header>
         
-        {user && isTeacher() && !ownedTeacherId && (
-          <AddTeacherSection onAddTeacher={handleAddTeacher} />
-        )}
+        <AddTeacherSection onAddTeacher={handleAddTeacher} />
         
         <main className="w-full space-y-8">
           <TeachersSection 

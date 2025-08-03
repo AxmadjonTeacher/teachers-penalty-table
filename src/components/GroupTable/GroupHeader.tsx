@@ -3,7 +3,7 @@ import React from 'react';
 import { CardHeader, CardTitle } from "@/components/ui/card";
 import { ExportActions } from "./ExportActions";
 import { ResetGradesDialog } from "./ResetGradesDialog";
-import { useAuth } from "@/contexts/AuthContext";
+
 
 interface Student {
   id: number;
@@ -29,7 +29,6 @@ export const GroupHeader: React.FC<GroupHeaderProps> = ({
   canEdit,
   onReset
 }) => {
-  const { isTeacher } = useAuth();
 
   return (
     <CardHeader className="bg-[#F1F0FB] pb-3 pt-4">
@@ -49,7 +48,7 @@ export const GroupHeader: React.FC<GroupHeaderProps> = ({
             dates={dates} 
             grades={grades} 
           />
-          {isTeacher() && canEdit && (
+          {canEdit && (
             <ResetGradesDialog onReset={onReset} />
           )}
         </div>

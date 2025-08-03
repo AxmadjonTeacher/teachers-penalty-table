@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { GradesState, saveDates, saveGrades, saveNotes } from '@/utils/gradeStorage';
-import { useAuth } from '@/contexts/AuthContext';
+
 
 type FetchOptions = {
   teacherId: string;
@@ -21,12 +21,10 @@ export const useSupabaseFetch = ({
   setGrades,
   setNotes
 }: FetchOptions) => {
-  const { user } = useAuth();
 
   // Fetch dates from Supabase
   useEffect(() => {
     const fetchDatesFromSupabase = async () => {
-      if (user) {
         try {
           console.log(`Fetching dates from Supabase for teacher: ${teacherId}, group: ${groupTitle}`);
           const { data, error } = await supabase
@@ -55,16 +53,14 @@ export const useSupabaseFetch = ({
         } catch (err) {
           console.error('Failed to fetch dates from Supabase:', err);
         }
-      }
     };
     
     fetchDatesFromSupabase();
-  }, [teacherId, groupTitle, user, setDates]);
+  }, [teacherId, groupTitle, setDates]);
 
   // Fetch grades from Supabase
   useEffect(() => {
     const fetchGradesFromSupabase = async () => {
-      if (user) {
         try {
           console.log(`Fetching grades from Supabase for teacher: ${teacherId}`);
           
@@ -120,16 +116,14 @@ export const useSupabaseFetch = ({
         } catch (err) {
           console.error('Failed to fetch grades from Supabase:', err);
         }
-      }
     };
     
     fetchGradesFromSupabase();
-  }, [teacherId, groupTitle, user, dates, setGrades]);
+  }, [teacherId, groupTitle, dates, setGrades]);
 
   // Fetch notes from Supabase
   useEffect(() => {
     const fetchNotesFromSupabase = async () => {
-      if (user) {
         try {
           console.log(`Fetching notes from Supabase for teacher: ${teacherId}, group: ${groupTitle}`);
           const { data, error } = await supabase
@@ -152,11 +146,10 @@ export const useSupabaseFetch = ({
         } catch (err) {
           console.error('Failed to fetch notes from Supabase:', err);
         }
-      }
     };
     
     fetchNotesFromSupabase();
-  }, [teacherId, groupTitle, user, setNotes]);
+  }, [teacherId, groupTitle, setNotes]);
 
   return null;
 };
